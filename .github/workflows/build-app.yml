@@ -38,18 +38,16 @@ jobs:
           # Create the app using Platypus command line tool
           # Adjust these parameters based on your specific script and requirements
           /Applications/Platypus.app/Contents/Resources/platypus_clt \
-            --app-name "NameMyPdf" \
+            --name "NameMyPdf" \
             --app-icon "icon.icns" \
             --author "Jay Pfaffman" \
             --app-version "0.1" \
             --bundle-identifier "com.literatecomputing.namemypdf" \
-            --interface-type "Droplet" \
+            --interface-type "Progress Bar" \
             --interpreter "/usr/bin/python3" \
             --app-icon "icon.icns" \
-            --accepts-files \
-            --accepts-text \
             --droppable \
-            --output-type "None" \
+            --file-prompt \
             --background \
             --quit-after-execution \
             "normalize_filename.py" \
