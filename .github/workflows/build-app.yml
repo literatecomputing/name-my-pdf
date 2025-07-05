@@ -24,7 +24,7 @@ jobs:
 
           # Install command line tool to /usr/local/bin
 
-          sudo /Applications/Platypus.app/Contents/Resources/platypus_clt -i /usr/local/bin
+          sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt -i /usr/local/bin
 
           # Verify installation
           platypus -v
