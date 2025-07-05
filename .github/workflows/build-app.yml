@@ -50,7 +50,7 @@ jobs:
             --bundle-identifier "com.literatecomputing.namemypdf" \
             --interface-type "Progress Bar" \
             --interpreter "/usr/bin/python3" \
-            --app-icon "icon.png" \
+            --app-icon "icon.icns" \
             --droppable \
             --file-prompt \
             --background \
