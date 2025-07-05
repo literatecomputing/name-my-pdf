@@ -1,31 +1,88 @@
-
-name: Build NameMyPdf App
+name: Build Mac App with Platypus
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: macos-latest
-
+    
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    
+    - name: Install Platypus
+      run: |
+        # Download and install Platypus
+        curl -L -o platypus.zip https://github.com/sveinbjornt/Platypus/releases/download/5.4.1/Platypus-5.4.1.zip
+        unzip platypus.zip
+        sudo cp -R Platypus.app /Applications/
+        
+        # Install command line tool
+        sudo /Applications/Platypus.app/Contents/Resources/platypus_clt -i
+        
+        # Verify installation
+        platypus -v
+    
+    - name: Debug Environment
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Files in current directory:"
+        ls -la
+        echo "Platypus version:"
+        platypus -v
+        echo "Python version:"
+        python3 --version
+    
+    - name: Build App
+      run: |
+        # Create the app using Platypus command line tool
+        # Adjust these parameters based on your specific script and requirements
+        platypus \
+          --app-name "NameMyPdf" \
+          --app-icon "icon.icns" \
+          --author "Your Name" \
+          --app-version "1.0" \
+          --bundle-identifier "com.yourcompany.namemypdf" \
+          --interface-type "Droplet" \
+          --interpreter "/usr/bin/python3" \
+          --app-icon "icon.icns" \
+          --accepts-files \
+          --accepts-text \
+          --droppable \
+          --output-type "None" \
+          --background \
+          --quit-after-execution \
+          "your_script.py" \
+          "NameMyPdf.app"
+    
+    - name: Create DMG (Optional)
+      run: |
+        # Create a DMG for distribution
+        mkdir -p dist
+        hdiutil create -size 50m -fs HFS+ -volname "NameMyPdf" temp.dmg
+        hdiutil attach temp.dmg -mountpoint /Volumes/NameMyPdf
+        cp -R NameMyPdf.app /Volumes/NameMyPdf/
+        hdiutil detach /Volumes/NameMyPdf
+        hdiutil convert temp.dmg -format UDZO -o dist/NameMyPdf.dmg
+        rm temp.dmg
+    
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: mac-app
+        path: |
+          NameMyPdf.app
+          dist/NameMyPdf.dmg
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/NameMyPdf.dmg
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Platypus
-        run: |
-          brew install --cask platypus
-
-      - name: Build App
-        run: |
-          platypus -a NameMyPdf -o None -p /usr/bin/python3 -i icon.png -D -f normalize_filename.py NameMyPdf.app
-
-      - name: Archive App
-        run: zip -r NameMyPdf.zip NameMyPdf.app
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: NameMyPdf
-          path: NameMyPdf.zip
