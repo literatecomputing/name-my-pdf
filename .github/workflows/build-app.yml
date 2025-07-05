@@ -18,6 +18,10 @@ jobs:
           # Method 1: Install via Homebrew (recommended)
           brew install --cask platypus
 
+          sleep 10 # Wait for Homebrew to finish installation
+
+          ls -l /Applications/Platypus.app/Contents/Resources/
+
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
             sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
           fi          
