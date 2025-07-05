@@ -18,7 +18,12 @@ jobs:
           # Method 1: Install via Homebrew (recommended)
           brew install --cask platypus
 
+          if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
+            sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
+          fi          
+
           # Install command line tool to /usr/local/bin
+
           sudo /Applications/Platypus.app/Contents/Resources/platypus_clt -i /usr/local/bin
 
           # Verify installation
@@ -41,9 +46,9 @@ jobs:
           platypus \
             --app-name "NameMyPdf" \
             --app-icon "icon.icns" \
-            --author "Your Name" \
-            --app-version "1.0" \
-            --bundle-identifier "com.yourcompany.namemypdf" \
+            --author "Jay Pfaffman" \
+            --app-version "0.1" \
+            --bundle-identifier "com.literatecomputing.namemypdf" \
             --interface-type "Droplet" \
             --interpreter "/usr/bin/python3" \
             --app-icon "icon.icns" \
@@ -53,7 +58,7 @@ jobs:
             --output-type "None" \
             --background \
             --quit-after-execution \
-            "your_script.py" \
+            "normalize_filename.py" \
             "NameMyPdf.app"
 
       - name: Create DMG (Optional)
