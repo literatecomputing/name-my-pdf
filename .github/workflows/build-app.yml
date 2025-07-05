@@ -16,7 +16,7 @@ jobs:
     - name: Install Platypus
       run: |
         # Download and install Platypus
-        curl -L -o platypus.zip https://github.com/sveinbjornt/Platypus/releases/download/5.4.1/Platypus-5.4.1.zip
+        curl -L -o platypus.zip https://github.com/sveinbjornt/Platypus/releases/download/v5.4.1/platypus5.4.1.zip
         unzip platypus.zip
         sudo cp -R Platypus.app /Applications/
         
