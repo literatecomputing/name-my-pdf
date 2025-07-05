@@ -21,6 +21,7 @@ jobs:
           # Check if the command line tool is compressed
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
             sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
+            sudo mkdir -p /usr/local/share/platypus
             sudo gunzip /Applications/Platypus.app/Contents/Resources/ScriptExec.gz
           fi
 
