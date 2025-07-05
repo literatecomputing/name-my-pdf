@@ -18,7 +18,7 @@ jobs:
           # Method 1: Install via Homebrew (recommended)
           brew install --cask platypus
 
-          sleep 10 # Wait for Homebrew to finish installation
+          sleep 3 # Wait for Homebrew to finish installation
 
           ls -l /Applications/Platypus.app/Contents/Resources/
 
@@ -45,7 +45,6 @@ jobs:
           # Adjust these parameters based on your specific script and requirements
           /Applications/Platypus.app/Contents/Resources/platypus_clt \
             --name "NameMyPdf" \
-            --app-icon "icon.icns" \
             --author "Jay Pfaffman" \
             --app-version "0.1" \
             --bundle-identifier "com.literatecomputing.namemypdf" \
