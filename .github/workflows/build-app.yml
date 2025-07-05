@@ -1,0 +1,31 @@
+
+name: Build NameMyPdf App
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Platypus
+        run: |
+          brew install --cask platypus
+
+      - name: Build App
+        run: |
+          platypus -a NameMyPdf -o None -p /usr/bin/python3 -i icon.png -D -f normalize_filename.py NameMyPdf.app
+
+      - name: Archive App
+        run: zip -r NameMyPdf.zip NameMyPdf.app
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: NameMyPdf
+          path: NameMyPdf.zip
