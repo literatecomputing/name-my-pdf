@@ -27,7 +27,8 @@ jobs:
 
           # Install command line tool to /usr/local/bin
           sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/
-          sudo install /Applications/Platypus.app/Contents/Resources/* /usr/local/share/platypus/
+          sudo install /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
+          sudo cp /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
 
           # Create the required directory structure and copy ScriptExec
           sudo mkdir -p /usr/local/share/platypus
