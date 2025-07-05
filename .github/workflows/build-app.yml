@@ -1,49 +1,60 @@
 name: Build Mac App with Platypus
-
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Platypus
         run: |
-          # Method 1: Install via Homebrew (recommended)
+          # Install Platypus via Homebrew
           brew install --cask platypus
 
-          sleep 3 # Wait for Homebrew to finish installation
+          # Wait for installation to complete
+          sleep 3
 
-          ls -l /Applications/Platypus.app/Contents/Resources/
-
+          # Check if the command line tool is compressed
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
             sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
-          fi          
+          fi
 
           # Install command line tool to /usr/local/bin
+          sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/
 
-          sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt  /usr/local/bin
+          # Create the required directory structure and copy ScriptExec
+          sudo mkdir -p /usr/local/share/platypus
+          sudo cp /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
+
+          # Make sure ScriptExec is executable
+          sudo chmod +x /usr/local/share/platypus/ScriptExec
 
           # Verify installation
-          /Applications/Platypus.app/Contents/Resources/platypus_clt -v
+          /usr/local/bin/platypus_clt -v
 
-      - name: debug env
+          # Debug: Check if ScriptExec exists
+          ls -la /usr/local/share/platypus/
+
+      - name: Debug Environment
         run: |
           echo "PATH: $PATH"
           echo "PWD: $PWD"
-          echo "Contents of dir:"
-          ls -l
+          echo "Contents of current directory:"
+          ls -la
+          echo "Contents of Platypus Resources:"
+          ls -la /Applications/Platypus.app/Contents/Resources/
+          echo "Python3 location:"
+          which python3
+          python3 --version
+
       - name: Build App
         run: |
           # Create the app using Platypus command line tool
-          # Adjust these parameters based on your specific script and requirements
-          /Applications/Platypus.app/Contents/Resources/platypus_clt \
+          /usr/local/bin/platypus_clt \
             --name "NameMyPdf" \
             --author "Jay Pfaffman" \
             --app-version "0.1" \
@@ -58,7 +69,18 @@ jobs:
             "normalize_filename.py" \
             "NameMyPdf.app"
 
-      - name: Create DMG (Optional)
+      - name: Verify App Creation
+        run: |
+          if [ -d "NameMyPdf.app" ]; then
+            echo "App created successfully!"
+            ls -la NameMyPdf.app/
+            ls -la NameMyPdf.app/Contents/
+          else
+            echo "App creation failed!"
+            exit 1
+          fi
+
+      - name: Create DMG
         run: |
           # Create a DMG for distribution
           mkdir -p dist
