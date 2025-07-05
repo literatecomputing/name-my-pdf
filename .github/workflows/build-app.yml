@@ -22,8 +22,16 @@ jobs:
         # curl -L -o platypus.zip "https://github.com/sveinbjornt/Platypus/releases/download/5.4.1/Platypus5.4.1.zip"
         # unzip platypus.zip
         # sudo cp -R Platypus.app /Applications/
+        # 
+        # # Decompress the command line tool
+        # sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
         
-        # Install command line tool
+        # Install command line tool (decompress first if using direct download)
+        if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
+          sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
+        fi
+        
+        # Install the command line tool
         sudo /Applications/Platypus.app/Contents/Resources/platypus_clt -i
         
         # Verify installation
@@ -88,4 +96,3 @@ jobs:
           dist/NameMyPdf.dmg
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
