@@ -31,7 +31,7 @@ jobs:
           sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt  /usr/local/bin
 
           # Verify installation
-          platypus -v
+          /Applications/Platypus.app/Contents/Resources/platypus_clt -v
 
       - name: Debug Environment
         run: |
