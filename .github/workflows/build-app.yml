@@ -47,7 +47,7 @@ jobs:
         run: |
           # Create the app using Platypus command line tool
           # Adjust these parameters based on your specific script and requirements
-          platypus_clt \
+          /Applications/Platypus.app/Contents/Resources/platypus_clt \
             --app-name "NameMyPdf" \
             --app-icon "icon.icns" \
             --author "Jay Pfaffman" \
