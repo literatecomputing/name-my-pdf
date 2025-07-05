@@ -33,16 +33,6 @@ jobs:
           # Verify installation
           /Applications/Platypus.app/Contents/Resources/platypus_clt -v
 
-      - name: Debug Environment
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Files in current directory:"
-          ls -la
-          echo "Platypus version:"
-          platypus -v
-          echo "Python version:"
-          python3 --version
-
       - name: Build App
         run: |
           # Create the app using Platypus command line tool
