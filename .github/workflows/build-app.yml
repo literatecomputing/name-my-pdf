@@ -9,37 +9,32 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Platypus
         run: |
           # Install Platypus via Homebrew
           brew install --cask platypus
-
           # Wait for installation to complete
           sleep 3
-
           # Check if the command line tool is compressed
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
             sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
             sudo mkdir -p /usr/local/share/platypus
             sudo gunzip /Applications/Platypus.app/Contents/Resources/ScriptExec.gz
           fi
-
           # Install command line tool to /usr/local/bin
           sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/
           sudo install /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
           sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
-
           # Create the required directory structure and copy ScriptExec
           sudo mkdir -p /usr/local/share/platypus
           sudo cp /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
-
           # Make sure ScriptExec is executable
           sudo chmod +x /usr/local/share/platypus/ScriptExec
-
           # Verify installation
           /usr/local/bin/platypus_clt -v
-
           # Debug: Check if ScriptExec exists
           ls -la /usr/local/share/platypus/
 
@@ -94,6 +89,28 @@ jobs:
           hdiutil detach /Volumes/NameMyPdf
           hdiutil convert temp.dmg -format UDZO -o dist/NameMyPdf.dmg
           rm temp.dmg
+
+      - name: Commit and Push Built App
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Add the built files
+          git add NameMyPdf.app/
+          git add dist/NameMyPdf.dmg
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            # Commit the changes
+            git commit -m "Auto-build: Update NameMyPdf.app and DMG [skip ci]"
+            
+            # Push the changes
+            git push
+          fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
