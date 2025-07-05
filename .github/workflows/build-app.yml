@@ -33,6 +33,12 @@ jobs:
           # Verify installation
           /Applications/Platypus.app/Contents/Resources/platypus_clt -v
 
+      - name: debug env
+        run: |
+          echo "PATH: $PATH"
+          echo "PWD: $PWD"
+          echo "Contents of dir:"
+          ls -l
       - name: Build App
         run: |
           # Create the app using Platypus command line tool
@@ -45,7 +51,7 @@ jobs:
             --bundle-identifier "com.literatecomputing.namemypdf" \
             --interface-type "Progress Bar" \
             --interpreter "/usr/bin/python3" \
-            --app-icon "icon.icns" \
+            --app-icon "icon.png" \
             --droppable \
             --file-prompt \
             --background \
