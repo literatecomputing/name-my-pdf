@@ -54,6 +54,7 @@ jobs:
         run: |
           # Create the app using Platypus command line tool
           /usr/local/bin/platypus_clt \
+            -y \
             --name "NameMyPdf" \
             --author "Jay Pfaffman" \
             --app-version "0.1" \
