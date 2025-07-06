@@ -85,6 +85,7 @@ jobs:
         run: |
           # Create a DMG for distribution
           mkdir -p dist
+          rm -f dist/NameMyPdf.dmg
           hdiutil create -size 50m -fs HFS+ -volname "NameMyPdf" temp.dmg
           hdiutil attach temp.dmg -mountpoint /Volumes/NameMyPdf
           cp -R NameMyPdf.app /Volumes/NameMyPdf/
