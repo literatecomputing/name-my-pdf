@@ -14,6 +14,8 @@ import requests
 import unicodedata
 from pathlib import Path
 from typing import Optional, List
+# add constant for user agent
+USER_AGENT = "PDF DOI Renamer/1.0 (https://github.com/literatecomputing/name-my-pdf)"
 
 def check_dependencies():
     """Check if required external tools are available."""
@@ -97,11 +99,23 @@ def capitalize_author_name(name: str) -> str:
 def get_crossref_metadata(doi: str, email: str) -> Optional[dict]:
     """Fetch metadata from CrossRef API."""
     url = f"https://api.crossref.org/works/{doi}"
-    params = {'mailto': email}
-    
+    # set email if CROSSREF_EMAIL environment variable is set
+    params = {'user_agent': USER_AGENT}
+    if not email and 'CROSSREF_EMAIL' in os.environ:
+        email = os.getenv('CROSSREF_EMAIL')
+        # add to params
+        params['mailto'] = email
+
+    # move params to headers
+    headers = {'User-Agent': USER_AGENT}
+    if email:
+        headers['X-CrossRef-Email'] = email
+
     try:
-        response = requests.get(url, params=params, timeout=30)
-        
+        response = requests.get(url, headers=headers, timeout=30)
+
+        print("Using url", url)
+
         if response.status_code == 404:
             print(f"DOI {doi} not found")
             return None
@@ -148,7 +162,12 @@ def extract_metadata(json_data: dict) -> dict:
     title = re.sub(r'<[^>]*>', ' ', title)
     # Remove non-alphanumeric characters except spaces
     title = re.sub(r'[^a-zA-Z0-9\s]', '', title)
-    
+
+    # remove words like "the", "a", "an" from the title
+    title = re.sub(r'\b(the|a|an|and|but|or|nor|for|so|yet|of|in|on|at|to|by|up|as|is|it|be|if|vs|via|per|pro|re|ex)\b', 
+               lambda m: m.group(0).lower(), title, flags=re.IGNORECASE)
+    title = re.sub(r'\b(the|a|an|and|but|or|nor|for|so|yet|of|in|on|at|to|by|up|as|is|it|be|if|vs|via|per|pro|re|ex)\b', '', title, flags=re.IGNORECASE)
+
     # Extract year
     year = None
     for date_field in ['published-print', 'published-online', 'created']:
@@ -246,8 +265,8 @@ def main():
     )
     parser.add_argument(
         '--email', 
-        required=True,
-        help='Email address for CrossRef API (required for etiquette)'
+        required=False,
+        help='Email address for CrossRef API (https://www.crossref.org/documentation/retrieve-metadata/rest-api/tips-for-using-the-crossref-rest-api/)'
     )
     
     args = parser.parse_args()
