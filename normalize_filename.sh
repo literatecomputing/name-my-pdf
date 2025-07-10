@@ -10,49 +10,23 @@ USER_AGENT="PDF DOI Renamer/1.0 (https://github.com/literatecomputing/name-my-pd
 check_dependencies() {
     local missing_tools=()
     
-    # Check for pdftotext (try system version first, bundled as fallback)
-    if command -v pdftotext >/dev/null 2>&1; then
-        PDFTOTEXT="pdftotext"
-        echo "Using system pdftotext"
-    elif [[ -f "$(dirname "$0")/pdftotext" ]]; then
-        PDFTOTEXT="$(dirname "$0")/pdftotext"
-        echo "Using bundled pdftotext"
-        # Test if bundled version works
-        if ! "$PDFTOTEXT" --version >/dev/null 2>&1; then
-            echo "Warning: Bundled pdftotext has missing dependencies"
-            missing_tools+=("pdftotext (install with: brew install poppler)")
-        fi
-    else
-        missing_tools+=("pdftotext (install with: brew install poppler)")
-    fi
-    
-    # Check for jq (try system version first, bundled as fallback)
-    if command -v jq >/dev/null 2>&1; then
-        JQ="jq"
-        echo "Using system jq"
-    elif [[ -f "$(dirname "$0")/jq" ]]; then
-        JQ="$(dirname "$0")/jq"
-        echo "Using bundled jq"
-        # Test if bundled version works
-        if ! "$JQ" --version >/dev/null 2>&1; then
-            echo "Warning: Bundled jq has missing dependencies"
-            missing_tools+=("jq (install with: brew install jq)")
-        fi
-    else
-        missing_tools+=("jq (install with: brew install jq)")
-    fi
-    
-    # Check for curl (should be available on all systems)
+    # Check for required tools in system PATH
+    command -v pdftotext >/dev/null 2>&1 || missing_tools+=("pdftotext (install with: brew install poppler)")
+    command -v jq >/dev/null 2>&1 || missing_tools+=("jq (install with: brew install jq)")
     command -v curl >/dev/null 2>&1 || missing_tools+=("curl")
     
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         echo "Missing required tools:"
         printf "  %s\n" "${missing_tools[@]}"
         echo ""
-        echo "For best compatibility, install tools manually:"
+        echo "Install missing tools with:"
         echo "  brew install poppler jq"
         exit 1
     fi
+    
+    # Set tool paths
+    PDFTOTEXT="pdftotext"
+    JQ="jq"
 }
 
 # Extract DOI from PDF file

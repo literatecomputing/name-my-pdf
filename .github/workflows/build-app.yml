@@ -17,8 +17,6 @@ jobs:
       - name: Install Dependencies
         run: |
           arch -arm64 brew install --cask platypus
-          arch -arm64 brew install poppler
-          arch -arm64 brew install jq
 
           sleep 2
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
@@ -30,18 +28,6 @@ jobs:
           sudo install /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
           sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
           sudo chmod +x /usr/local/share/platypus/ScriptExec
-
-      - name: Download Intel versions of tools
-        run: |
-          # Install Intel Homebrew in a separate location
-          mkdir -p /tmp/intel-homebrew
-          cd /tmp/intel-homebrew
-
-          # Download and install Intel Homebrew
-          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-          # Install Intel versions of tools
-          arch -x86_64 /usr/local/bin/brew install poppler jq
 
       - name: Make Shell Script Executable
         run: |
@@ -67,97 +53,34 @@ jobs:
 
           mkdir -p NameMyPdf.app/Contents/Resources
 
-          # Copy ARM64 versions (default)
-          cp /opt/homebrew/bin/pdftotext NameMyPdf.app/Contents/Resources/pdftotext-arm64
-          cp /opt/homebrew/bin/jq NameMyPdf.app/Contents/Resources/jq-arm64
-
-          # Copy Intel versions with dependencies
-          cp /usr/local/bin/pdftotext NameMyPdf.app/Contents/Resources/pdftotext-x86_64
-          cp /usr/local/bin/jq NameMyPdf.app/Contents/Resources/jq-x86_64
-
-          # Alternative: Check what libraries are actually needed
-          echo "Checking pdftotext dependencies:"
-          otool -L /usr/local/bin/pdftotext || true
-          otool -L /opt/homebrew/bin/pdftotext || true
-
-          # Create lib directories first
-          mkdir -p NameMyPdf.app/Contents/Resources/lib-x86_64
-          mkdir -p NameMyPdf.app/Contents/Resources/lib-arm64
-
-          # Copy all required poppler and dependencies for Intel
-          if [[ -d /usr/local/lib ]]; then
-              find /usr/local/lib -name "libpoppler*" -o -name "libfontconfig*" -o -name "libfreetype*" -o -name "libjpeg*" -o -name "libpng*" -o -name "libtiff*" | \
-              xargs -I {} cp {} NameMyPdf.app/Contents/Resources/lib-x86_64/ 2>/dev/null || true
-          fi
-
-          # Copy all required poppler and dependencies for ARM64
-          if [[ -d /opt/homebrew/lib ]]; then
-              find /opt/homebrew/lib -name "libpoppler*" -o -name "libfontconfig*" -o -name "libfreetype*" -o -name "libjpeg*" -o -name "libpng*" -o -name "libtiff*" | \
-              xargs -I {} cp {} NameMyPdf.app/Contents/Resources/lib-arm64/ 2>/dev/null || true
-          fi          # Create universal launcher scripts
-          cat > NameMyPdf.app/Contents/Resources/pdftotext << 'EOF'
-          #!/bin/bash
-          ARCH=$(uname -m)
-          SCRIPT_DIR="$(dirname "$0")"
-          if [[ "$ARCH" == "arm64" ]]; then
-              DYLD_LIBRARY_PATH="$SCRIPT_DIR/lib-arm64:$DYLD_LIBRARY_PATH" exec "$SCRIPT_DIR/pdftotext-arm64" "$@"
-          else
-              DYLD_LIBRARY_PATH="$SCRIPT_DIR/lib-x86_64:$DYLD_LIBRARY_PATH" exec "$SCRIPT_DIR/pdftotext-x86_64" "$@"
-          fi
-          EOF
-
-          cat > NameMyPdf.app/Contents/Resources/jq << 'EOF'
-          #!/bin/bash
-          ARCH=$(uname -m)
-          SCRIPT_DIR="$(dirname "$0")"
-          if [[ "$ARCH" == "arm64" ]]; then
-              exec "$SCRIPT_DIR/jq-arm64" "$@"
-          else
-              exec "$SCRIPT_DIR/jq-x86_64" "$@"
-          fi
-          EOF
-
-          # Make launcher scripts executable
-          chmod +x NameMyPdf.app/Contents/Resources/pdftotext
-          chmod +x NameMyPdf.app/Contents/Resources/jq
-          chmod +x NameMyPdf.app/Contents/Resources/pdftotext-arm64
-          chmod +x NameMyPdf.app/Contents/Resources/pdftotext-x86_64
-          chmod +x NameMyPdf.app/Contents/Resources/jq-arm64
-          chmod +x NameMyPdf.app/Contents/Resources/jq-x86_64          
           # Include shell script for cross-platform users
           cp normalize_filename.sh NameMyPdf.app/Contents/Resources/
 
-          # Create a README for shell script users
-          cat > NameMyPdf.app/Contents/Resources/README_ShellScript.txt << 'EOF'
-          # NameMyPdf - Shell Script Usage
+          # Create a simple README with installation instructions
+          cat > NameMyPdf.app/Contents/Resources/README.txt << 'EOF'
+          # NameMyPdf - PDF DOI Renamer
 
-          This app tries to use your system tools first, with bundled tools as fallback.
+          ## Prerequisites:
+          This app requires poppler and jq to be installed:
 
-          ## Tool Detection Order:
-          1. System-installed tools (via Homebrew) - Most reliable
-          2. Bundled tools (included in app) - May have dependency issues
-          3. Error message with installation instructions
-
-          ## For best results:
-          Install tools on your system:
-          - macOS: `brew install poppler jq`
-          - Ubuntu/Debian: `sudo apt-get install poppler-utils jq curl`
+          ```
+          brew install poppler jq
+          ```
 
           ## Usage:
-          ./normalize_filename.sh [--email your@email.com] file1.pdf file2.pdf
+          - Drag PDF files onto the app
+          - Or run the shell script directly: ./normalize_filename.sh file.pdf
 
           ## What it does:
-          - Extracts text from PDF files using pdftotext
-          - Generates a descriptive filename based on DOI metadata from CrossRef
-          - Renames the file automatically
+          - Extracts DOI from PDF files
+          - Fetches metadata from CrossRef API
+          - Renames files based on author, year, and title
 
           ## Notes:
-          - System tools are preferred (better dependency resolution)
-          - Bundled tools work as fallback but may have library issues
           - Set CROSSREF_EMAIL environment variable for better API rate limits
-          - Works on any Unix-like system (macOS, Linux, WSL)
+          - Works on any system with bash, poppler, jq, and curl
 
-          The shell script provides the same functionality as the app.
+          Simple, lightweight, and reliable!
           EOF
 
       - name: Verify App Creation
@@ -175,7 +98,7 @@ jobs:
         run: |
           mkdir -p dist
           rm -f dist/NameMyPdf.dmg
-          hdiutil create -size 50m -fs HFS+ -volname "NameMyPdf" temp.dmg
+          hdiutil create -size 10m -fs HFS+ -volname "NameMyPdf" temp.dmg
           hdiutil attach temp.dmg -mountpoint /Volumes/NameMyPdf
           cp -R NameMyPdf.app /Volumes/NameMyPdf/
           hdiutil detach /Volumes/NameMyPdf
