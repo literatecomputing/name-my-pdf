@@ -13,6 +13,15 @@ check_dependencies() {
     # Check for pdftotext (try bundled version first)
     if [[ -f "$(dirname "$0")/pdftotext" ]]; then
         PDFTOTEXT="$(dirname "$0")/pdftotext"
+        # Test if bundled version works
+        if ! "$PDFTOTEXT" --version >/dev/null 2>&1; then
+            echo "Warning: Bundled pdftotext has missing dependencies, trying system version..."
+            if command -v pdftotext >/dev/null 2>&1; then
+                PDFTOTEXT="pdftotext"
+            else
+                missing_tools+=("pdftotext (bundled version failed, install with: brew install poppler)")
+            fi
+        fi
     elif command -v pdftotext >/dev/null 2>&1; then
         PDFTOTEXT="pdftotext"
     else
@@ -22,6 +31,15 @@ check_dependencies() {
     # Check for jq (try bundled version first)
     if [[ -f "$(dirname "$0")/jq" ]]; then
         JQ="$(dirname "$0")/jq"
+        # Test if bundled version works
+        if ! "$JQ" --version >/dev/null 2>&1; then
+            echo "Warning: Bundled jq has missing dependencies, trying system version..."
+            if command -v jq >/dev/null 2>&1; then
+                JQ="jq"
+            else
+                missing_tools+=("jq (bundled version failed, install with: brew install jq)")
+            fi
+        fi
     elif command -v jq >/dev/null 2>&1; then
         JQ="jq"
     else
@@ -34,6 +52,9 @@ check_dependencies() {
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         echo "Missing required tools:"
         printf "  %s\n" "${missing_tools[@]}"
+        echo ""
+        echo "For Intel Macs, you may need to install tools manually:"
+        echo "  brew install poppler jq"
         exit 1
     fi
 }
