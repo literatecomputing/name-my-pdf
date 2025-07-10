@@ -21,6 +21,18 @@ jobs:
           pipx install pyinstaller
           pipx runpip pyinstaller install requests PyPDF2
 
+          # Unpack and install Platypus command line tool
+          sleep 2
+          if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
+            sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
+            sudo gunzip /Applications/Platypus.app/Contents/Resources/ScriptExec.gz
+          fi
+          sudo mkdir -p /usr/local/share/platypus
+          sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/
+          sudo install /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
+          sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
+          sudo chmod +x /usr/local/share/platypus/ScriptExec
+
       - name: Build Python Executable with PyInstaller
         run: |
           pipx run pyinstaller --onefile normalize_filename.py
@@ -32,7 +44,7 @@ jobs:
       - name: Build App with Platypus
         run: |
           rm -rf NameMyPdf.app
-          platypus \
+          /usr/local/bin/platypus_clt \
             --name "NameMyPdf" \
             --author "Jay Pfaffman" \
             --app-version "0.1" \
