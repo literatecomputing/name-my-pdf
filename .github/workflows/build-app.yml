@@ -33,10 +33,9 @@ jobs:
           sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
           sudo chmod +x /usr/local/share/platypus/ScriptExec
 
-      - name: Build PyInstaller Executables (x86_64 and arm64)
+      - name: Build PyInstaller Universal Binary
         run: |
-          arch -x86_64 pipx run pyinstaller --onefile normalize_filename.py --distpath dist/x86_64
-          arch -arm64 pipx run pyinstaller --onefile normalize_filename.py --distpath dist/arm64
+          arch -arm64 pipx run pyinstaller --onefile normalize_filename.py --target-architecture universal2
 
       - name: Create Universal Binary
         run: |
