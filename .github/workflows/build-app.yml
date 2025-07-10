@@ -18,9 +18,7 @@ jobs:
         run: |
           arch -arm64 brew install --cask platypus
           arch -arm64 brew install poppler
-          arch -arm64 brew install pipx
-          pipx install pyinstaller
-          pipx runpip pyinstaller install requests PyPDF2
+          arch -arm64 brew install jq
 
           sleep 2
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
@@ -33,18 +31,9 @@ jobs:
           sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
           sudo chmod +x /usr/local/share/platypus/ScriptExec
 
-      - name: Build PyInstaller Binary
+      - name: Make Shell Script Executable
         run: |
-          pipx run pyinstaller --onefile normalize_filename.py
-
-      # - name: Create Universal Binary
-      #   run: |
-      #     lipo -create -output dist/normalize_filename dist/x86_64/normalize_filename dist/arm64/normalize_filename
-      #     chmod +x dist/normalize_filename
-
-      - name: Debug PyInstaller Output
-        run: |
-          ls -la dist/
+          chmod +x normalize_filename.sh
 
       - name: Build App with Platypus
         run: |
@@ -61,35 +50,29 @@ jobs:
             --file-prompt \
             --background \
             --quit-after-execution \
-            "dist/normalize_filename" \
+            "normalize_filename.sh" \
             "NameMyPdf.app"
 
           mkdir -p NameMyPdf.app/Contents/Resources
           cp /opt/homebrew/bin/pdftotext NameMyPdf.app/Contents/Resources/
+          cp /opt/homebrew/bin/jq NameMyPdf.app/Contents/Resources/          
+          # Include shell script for cross-platform users
+          cp normalize_filename.sh NameMyPdf.app/Contents/Resources/
 
-          # Include Python script for x86_64 users and manual execution
-          cp normalize_filename.py NameMyPdf.app/Contents/Resources/
+          # Create a README for shell script users
+          cat > NameMyPdf.app/Contents/Resources/README_ShellScript.txt << 'EOF'
+          # NameMyPdf - Shell Script Usage
 
-          # Create a requirements.txt for the Python dependencies
-          echo "requests" > NameMyPdf.app/Contents/Resources/requirements.txt
-
-          # Create a README for Python script users
-          cat > NameMyPdf.app/Contents/Resources/README_Python.txt << 'EOF'
-          # NameMyPdf - Python Script Usage
-
-          If the main app doesn't work on your system (e.g., x86_64 Macs), you can run the Python script directly:
+          If the main app doesn't work on your system, you can run the shell script directly:
 
           ## Prerequisites:
-          1. Install Python 3.7+
-          2. Install poppler (for pdftotext):
-             - macOS: `brew install poppler`
-             - Ubuntu/Debian: `sudo apt-get install poppler-utils`
-             - Windows: Download from https://poppler.freedesktop.org/
-          3. Install Python packages:
-             `pip install -r requirements.txt`
+          1. Install required tools:
+             - macOS: `brew install poppler jq`
+             - Ubuntu/Debian: `sudo apt-get install poppler-utils jq curl`
+             - Other systems: Install poppler, jq, and curl
 
           ## Usage:
-          python3 normalize_filename.py path/to/your/pdf/file.pdf
+          ./normalize_filename.sh [--email your@email.com] file1.pdf file2.pdf
 
           ## What it does:
           - Extracts text from PDF files using pdftotext
@@ -97,11 +80,10 @@ jobs:
           - Renames the file automatically
 
           ## Notes:
-          - The script looks for pdftotext in your PATH or in the same directory
-          - For Intel Macs, you'll need to install poppler separately since the included pdftotext is ARM64-only
           - Set CROSSREF_EMAIL environment variable for better API rate limits
+          - Works on any Unix-like system (macOS, Linux, WSL)
 
-          The Python script provides the same functionality as the compiled binary.
+          The shell script provides the same functionality as the compiled app.
           EOF
 
       - name: Verify App Creation
