@@ -1,8 +1,0 @@
-#!/bin/bash
-ARCH=$(uname -m)
-SCRIPT_DIR="$(dirname "$0")"
-if [[ "$ARCH" == "arm64" ]]; then
-    DYLD_LIBRARY_PATH="$SCRIPT_DIR/lib-arm64:$DYLD_LIBRARY_PATH" exec "$SCRIPT_DIR/pdftotext-arm64" "$@"
-else
-    DYLD_LIBRARY_PATH="$SCRIPT_DIR/lib-x86_64:$DYLD_LIBRARY_PATH" exec "$SCRIPT_DIR/pdftotext-x86_64" "$@"
-fi
