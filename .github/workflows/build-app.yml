@@ -31,6 +31,18 @@ jobs:
           sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
           sudo chmod +x /usr/local/share/platypus/ScriptExec
 
+      - name: Download Intel versions of tools
+        run: |
+          # Install Intel Homebrew in a separate location
+          mkdir -p /tmp/intel-homebrew
+          cd /tmp/intel-homebrew
+
+          # Download and install Intel Homebrew
+          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+          # Install Intel versions of tools
+          arch -x86_64 /usr/local/bin/brew install poppler jq
+
       - name: Make Shell Script Executable
         run: |
           chmod +x normalize_filename.sh
@@ -54,8 +66,45 @@ jobs:
             "NameMyPdf.app"
 
           mkdir -p NameMyPdf.app/Contents/Resources
-          cp /opt/homebrew/bin/pdftotext NameMyPdf.app/Contents/Resources/
-          cp /opt/homebrew/bin/jq NameMyPdf.app/Contents/Resources/          
+
+          # Copy ARM64 versions (default)
+          cp /opt/homebrew/bin/pdftotext NameMyPdf.app/Contents/Resources/pdftotext-arm64
+          cp /opt/homebrew/bin/jq NameMyPdf.app/Contents/Resources/jq-arm64
+
+          # Copy Intel versions
+          cp /usr/local/bin/pdftotext NameMyPdf.app/Contents/Resources/pdftotext-x86_64
+          cp /usr/local/bin/jq NameMyPdf.app/Contents/Resources/jq-x86_64
+
+          # Create universal launcher scripts
+          cat > NameMyPdf.app/Contents/Resources/pdftotext << 'EOF'
+          #!/bin/bash
+          ARCH=$(uname -m)
+          SCRIPT_DIR="$(dirname "$0")"
+          if [[ "$ARCH" == "arm64" ]]; then
+              exec "$SCRIPT_DIR/pdftotext-arm64" "$@"
+          else
+              exec "$SCRIPT_DIR/pdftotext-x86_64" "$@"
+          fi
+          EOF
+
+          cat > NameMyPdf.app/Contents/Resources/jq << 'EOF'
+          #!/bin/bash
+          ARCH=$(uname -m)
+          SCRIPT_DIR="$(dirname "$0")"
+          if [[ "$ARCH" == "arm64" ]]; then
+              exec "$SCRIPT_DIR/jq-arm64" "$@"
+          else
+              exec "$SCRIPT_DIR/jq-x86_64" "$@"
+          fi
+          EOF
+
+          # Make launcher scripts executable
+          chmod +x NameMyPdf.app/Contents/Resources/pdftotext
+          chmod +x NameMyPdf.app/Contents/Resources/jq
+          chmod +x NameMyPdf.app/Contents/Resources/pdftotext-arm64
+          chmod +x NameMyPdf.app/Contents/Resources/pdftotext-x86_64
+          chmod +x NameMyPdf.app/Contents/Resources/jq-arm64
+          chmod +x NameMyPdf.app/Contents/Resources/jq-x86_64          
           # Include shell script for cross-platform users
           cp normalize_filename.sh NameMyPdf.app/Contents/Resources/
 
@@ -63,9 +112,14 @@ jobs:
           cat > NameMyPdf.app/Contents/Resources/README_ShellScript.txt << 'EOF'
           # NameMyPdf - Shell Script Usage
 
-          If the main app doesn't work on your system, you can run the shell script directly:
+          This app includes universal binaries that work on both Apple Silicon and Intel Macs!
+
+          If you need to run the shell script directly:
 
           ## Prerequisites:
+          The app already includes both ARM64 and Intel versions of required tools.
+
+          For standalone use on other systems:
           1. Install required tools:
              - macOS: `brew install poppler jq`
              - Ubuntu/Debian: `sudo apt-get install poppler-utils jq curl`
@@ -80,6 +134,7 @@ jobs:
           - Renames the file automatically
 
           ## Notes:
+          - The bundled tools automatically detect your Mac's architecture (ARM64/Intel)
           - Set CROSSREF_EMAIL environment variable for better API rate limits
           - Works on any Unix-like system (macOS, Linux, WSL)
 
