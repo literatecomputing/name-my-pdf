@@ -17,28 +17,23 @@ from typing import Optional, List
 # add constant for user agent
 USER_AGENT = "PDF DOI Renamer/1.0 (https://github.com/literatecomputing/name-my-pdf)"
 
-def check_dependencies():
-    """Check if required external tools are available."""
-    required_tools = ['pdftotext']
-    missing_tools = []
-    
-    for tool in required_tools:
-        try:
-            subprocess.run([tool, '--version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        except FileNotFoundError:
-            missing_tools.append(tool)
-    
-    if missing_tools:
-        print(f"Missing required tools: {', '.join(missing_tools)}")
-        print("Please install poppler-utils (or 'brew install poppler' on macOS)")
-        sys.exit(1)
-
 def get_doi_from_pdf_file(pdf_path: str) -> Optional[str]:
+    # if pdftotext is not installed, use the one in the same directory as this script
+    """Check if pdftotext is installed and available."""
+    if not shutil.which('pdftotext'):
+        script_dir = Path(__file__).parent
+        pdftotext_path = script_dir / 'pdftotext'
+        if pdftotext_path.exists() and pdftotext_path.is_file():
+            return pdftotext_path
+        else:
+            print("pdftotext is not installed and not found in the script directory.")
+            sys.exit(1)
+
     """Extract DOI from PDF file using pdftotext."""
     try:
         # Use pdftotext to extract first 2 pages
         result = subprocess.run(
-            ['pdftotext', pdf_path, '-l', '2', '-'],
+            [pdftotext_path, pdf_path, '-l', '2', '-'],
             capture_output=True,
             text=True,
             encoding='utf-8'
