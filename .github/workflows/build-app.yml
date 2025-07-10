@@ -71,22 +71,37 @@ jobs:
           cp /opt/homebrew/bin/pdftotext NameMyPdf.app/Contents/Resources/pdftotext-arm64
           cp /opt/homebrew/bin/jq NameMyPdf.app/Contents/Resources/jq-arm64
 
-          # Copy Intel versions
+          # Copy Intel versions with dependencies
           cp /usr/local/bin/pdftotext NameMyPdf.app/Contents/Resources/pdftotext-x86_64
           cp /usr/local/bin/jq NameMyPdf.app/Contents/Resources/jq-x86_64
-
-          # Create universal launcher scripts
+          
+          # Alternative: Check what libraries are actually needed
+          echo "Checking pdftotext dependencies:"
+          otool -L /usr/local/bin/pdftotext || true
+          otool -L /opt/homebrew/bin/pdftotext || true
+          
+          # Copy all required poppler and dependencies for Intel
+          if [[ -d /usr/local/lib ]]; then
+              find /usr/local/lib -name "libpoppler*" -o -name "libfontconfig*" -o -name "libfreetype*" -o -name "libjpeg*" -o -name "libpng*" -o -name "libtiff*" | \
+              xargs -I {} cp {} NameMyPdf.app/Contents/Resources/lib-x86_64/ 2>/dev/null || true
+          fi
+          
+          # Copy all required poppler and dependencies for ARM64
+          if [[ -d /opt/homebrew/lib ]]; then
+              find /opt/homebrew/lib -name "libpoppler*" -o -name "libfontconfig*" -o -name "libfreetype*" -o -name "libjpeg*" -o -name "libpng*" -o -name "libtiff*" | \
+              xargs -I {} cp {} NameMyPdf.app/Contents/Resources/lib-arm64/ 2>/dev/null || true
+          fi          # Create universal launcher scripts
           cat > NameMyPdf.app/Contents/Resources/pdftotext << 'EOF'
           #!/bin/bash
           ARCH=$(uname -m)
           SCRIPT_DIR="$(dirname "$0")"
           if [[ "$ARCH" == "arm64" ]]; then
-              exec "$SCRIPT_DIR/pdftotext-arm64" "$@"
+              DYLD_LIBRARY_PATH="$SCRIPT_DIR/lib-arm64:$DYLD_LIBRARY_PATH" exec "$SCRIPT_DIR/pdftotext-arm64" "$@"
           else
-              exec "$SCRIPT_DIR/pdftotext-x86_64" "$@"
+              DYLD_LIBRARY_PATH="$SCRIPT_DIR/lib-x86_64:$DYLD_LIBRARY_PATH" exec "$SCRIPT_DIR/pdftotext-x86_64" "$@"
           fi
           EOF
-
+          
           cat > NameMyPdf.app/Contents/Resources/jq << 'EOF'
           #!/bin/bash
           ARCH=$(uname -m)
