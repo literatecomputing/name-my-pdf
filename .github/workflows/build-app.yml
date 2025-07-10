@@ -37,10 +37,10 @@ jobs:
         run: |
           arch -arm64 pipx run pyinstaller --onefile normalize_filename.py --target-architecture universal2
 
-      - name: Create Universal Binary
-        run: |
-          lipo -create -output dist/normalize_filename dist/x86_64/normalize_filename dist/arm64/normalize_filename
-          chmod +x dist/normalize_filename
+      # - name: Create Universal Binary
+      #   run: |
+      #     lipo -create -output dist/normalize_filename dist/x86_64/normalize_filename dist/arm64/normalize_filename
+      #     chmod +x dist/normalize_filename
 
       - name: Debug PyInstaller Output
         run: |
