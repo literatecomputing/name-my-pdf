@@ -11,19 +11,25 @@ check_dependencies() {
     local missing_tools=()
     
     # Check for pdftotext (try bundled version first)
-    if ! command -v pdftotext >/dev/null 2>&1; then
-        if [[ -f "$(dirname "$0")/pdftotext" ]]; then
-            PDFTOTEXT="$(dirname "$0")/pdftotext"
-        else
-            missing_tools+=("pdftotext (install with: brew install poppler)")
-        fi
-    else
+    if [[ -f "$(dirname "$0")/pdftotext" ]]; then
+        PDFTOTEXT="$(dirname "$0")/pdftotext"
+    elif command -v pdftotext >/dev/null 2>&1; then
         PDFTOTEXT="pdftotext"
+    else
+        missing_tools+=("pdftotext (install with: brew install poppler)")
     fi
     
-    # Check for other required tools
+    # Check for jq (try bundled version first)
+    if [[ -f "$(dirname "$0")/jq" ]]; then
+        JQ="$(dirname "$0")/jq"
+    elif command -v jq >/dev/null 2>&1; then
+        JQ="jq"
+    else
+        missing_tools+=("jq (install with: brew install jq)")
+    fi
+    
+    # Check for curl (should be available on all systems)
     command -v curl >/dev/null 2>&1 || missing_tools+=("curl")
-    command -v jq >/dev/null 2>&1 || missing_tools+=("jq (install with: brew install jq)")
     
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         echo "Missing required tools:"
@@ -71,13 +77,13 @@ get_crossref_metadata() {
 # Extract author from JSON
 extract_author() {
     local json="$1"
-    echo "$json" | jq -r '.message.author[0].family // empty' | clean_text
+    echo "$json" | "$JQ" -r '.message.author[0].family // empty' | clean_text
 }
 
 # Extract year from JSON
 extract_year() {
     local json="$1"
-    echo "$json" | jq -r '
+    echo "$json" | "$JQ" -r '
         .message 
         | (."published-print"."date-parts"[0][0] // 
            ."published-online"."date-parts"[0][0] // 
@@ -90,7 +96,7 @@ extract_year() {
 # Extract title from JSON
 extract_title() {
     local json="$1"
-    echo "$json" | jq -r '.message.title[0] // empty' | \
+    echo "$json" | "$JQ" -r '.message.title[0] // empty' | \
         sed 's/<[^>]*>//g' | \
         sed 's/[^a-zA-Z0-9 ]//g' | \
         sed -E 's/\b(the|a|an|and|but|or|nor|for|so|yet|of|in|on|at|to|by|up|as|is|it|be|if|vs|via|per|pro|re|ex)\b//gi' | \
