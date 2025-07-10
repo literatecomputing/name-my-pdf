@@ -17,12 +17,13 @@ jobs:
         run: |
           brew install --cask platypus
           brew install poppler
-          python3 -m pip install --upgrade pip
-          python3 -m pip install pyinstaller requests PyPDF2
+          brew install pipx
+          pipx install pyinstaller
+          pipx runpip pyinstaller install requests PyPDF2
 
       - name: Build Python Executable with PyInstaller
         run: |
-          pyinstaller --onefile normalize_filename.py
+          pipx run pyinstaller --onefile normalize_filename.py
 
       - name: Debug PyInstaller Output
         run: |
