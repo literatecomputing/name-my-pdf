@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main]
 
+    # comment for push
+
 jobs:
   build:
     runs-on: macos-latest-xlarge
