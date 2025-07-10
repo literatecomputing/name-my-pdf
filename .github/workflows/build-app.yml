@@ -1,4 +1,4 @@
-name: Build Mac App with Platypus and PyInstaller
+name: Build Mac App with Platypus and PyInstaller (Universal Binary)
 
 on:
   push:
@@ -8,20 +8,19 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
-          brew install --cask platypus
-          brew install poppler
-          brew install pipx
+          arch -arm64 brew install --cask platypus
+          arch -arm64 brew install poppler
+          arch -arm64 brew install pipx
           pipx install pyinstaller
           pipx runpip pyinstaller install requests PyPDF2
 
-          # Unpack and install Platypus command line tool
           sleep 2
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
             sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
@@ -33,9 +32,15 @@ jobs:
           sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
           sudo chmod +x /usr/local/share/platypus/ScriptExec
 
-      - name: Build Python Executable with PyInstaller
+      - name: Build PyInstaller Executables (x86_64 and arm64)
         run: |
-          pipx run pyinstaller --onefile normalize_filename.py
+          arch -x86_64 pipx run pyinstaller --onefile normalize_filename.py --distpath dist/x86_64
+          arch -arm64 pipx run pyinstaller --onefile normalize_filename.py --distpath dist/arm64
+
+      - name: Create Universal Binary
+        run: |
+          lipo -create -output dist/normalize_filename dist/x86_64/normalize_filename dist/arm64/normalize_filename
+          chmod +x dist/normalize_filename
 
       - name: Debug PyInstaller Output
         run: |
