@@ -10,26 +10,37 @@ import sys
 import re
 import subprocess
 import argparse
-import requests
+import json
+import urllib.request
+import urllib.error
 import unicodedata
+import shutil
 from pathlib import Path
 from typing import Optional, List
 # add constant for user agent
 USER_AGENT = "PDF DOI Renamer/1.0 (https://github.com/literatecomputing/name-my-pdf)"
 
-def get_doi_from_pdf_file(pdf_path: str) -> Optional[str]:
-    # if pdftotext is not installed, use the one in the same directory as this script
-    """Check if pdftotext is installed and available."""
-    if not shutil.which('pdftotext'):
-        script_dir = Path(__file__).parent
-        pdftotext_path = script_dir / 'pdftotext'
-        if pdftotext_path.exists() and pdftotext_path.is_file():
-            return pdftotext_path
-        else:
-            print("pdftotext is not installed and not found in the script directory.")
-            sys.exit(1)
+def get_pdftotext_path() -> str:
+    """Get path to pdftotext executable."""
+    # First try system PATH
+    pdftotext_path = shutil.which('pdftotext')
+    if pdftotext_path:
+        return pdftotext_path
+    
+    # Try bundled version in same directory
+    script_dir = Path(__file__).parent
+    bundled_pdftotext = script_dir / 'pdftotext'
+    if bundled_pdftotext.exists() and bundled_pdftotext.is_file():
+        return str(bundled_pdftotext)
+    
+    print("pdftotext is not installed and not found in the script directory.")
+    print("Please install poppler: brew install poppler")
+    sys.exit(1)
 
+def get_doi_from_pdf_file(pdf_path: str) -> Optional[str]:
     """Extract DOI from PDF file using pdftotext."""
+    pdftotext_path = get_pdftotext_path()
+    
     try:
         # Use pdftotext to extract first 2 pages
         result = subprocess.run(
@@ -94,31 +105,39 @@ def capitalize_author_name(name: str) -> str:
 def get_crossref_metadata(doi: str, email: str) -> Optional[dict]:
     """Fetch metadata from CrossRef API."""
     url = f"https://api.crossref.org/works/{doi}"
-    # set email if CROSSREF_EMAIL environment variable is set
-    params = {'user_agent': USER_AGENT}
+    
+    # Prepare headers
+    headers = {'User-Agent': USER_AGENT}
     if not email and 'CROSSREF_EMAIL' in os.environ:
         email = os.getenv('CROSSREF_EMAIL')
-        # add to params
-        params['mailto'] = email
-
-    # move params to headers
-    headers = {'User-Agent': USER_AGENT}
     if email:
         headers['X-CrossRef-Email'] = email
 
     try:
-        response = requests.get(url, headers=headers, timeout=30)
-
+        # Create request with headers
+        req = urllib.request.Request(url, headers=headers)
+        
         print("Using url", url)
-
-        if response.status_code == 404:
+        
+        with urllib.request.urlopen(req, timeout=30) as response:
+            if response.status == 404:
+                print(f"DOI {doi} not found")
+                return None
+            
+            # Read and decode response
+            data = response.read().decode('utf-8')
+            return json.loads(data)
+        
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
             print(f"DOI {doi} not found")
             return None
-            
-        response.raise_for_status()
-        return response.json()
-        
-    except requests.exceptions.RequestException as e:
+        print(f"HTTP error fetching metadata for {doi}: {e}")
+        return None
+    except urllib.error.URLError as e:
+        print(f"URL error fetching metadata for {doi}: {e}")
+        return None
+    except Exception as e:
         print(f"Error fetching metadata for {doi}: {e}")
         return None
 
@@ -248,6 +267,15 @@ def process_pdf(pdf_path: str, email: str) -> bool:
     except Exception as e:
         print(f"Error renaming file: {e}")
         return False
+
+def check_dependencies():
+    """Check if required dependencies are available."""
+    try:
+        get_pdftotext_path()
+        print("Dependencies check passed")
+    except SystemExit:
+        print("Dependency check failed")
+        raise
 
 def main():
     parser = argparse.ArgumentParser(
