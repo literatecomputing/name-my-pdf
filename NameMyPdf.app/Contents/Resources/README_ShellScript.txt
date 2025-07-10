@@ -1,8 +1,13 @@
 # NameMyPdf - Shell Script Usage
 
-If the main app doesn't work on your system, you can run the shell script directly:
+This app includes universal binaries that work on both Apple Silicon and Intel Macs!
+
+If you need to run the shell script directly:
 
 ## Prerequisites:
+The app already includes both ARM64 and Intel versions of required tools.
+
+For standalone use on other systems:
 1. Install required tools:
    - macOS: `brew install poppler jq`
    - Ubuntu/Debian: `sudo apt-get install poppler-utils jq curl`
@@ -17,6 +22,7 @@ If the main app doesn't work on your system, you can run the shell script direct
 - Renames the file automatically
 
 ## Notes:
+- The bundled tools automatically detect your Mac's architecture (ARM64/Intel)
 - Set CROSSREF_EMAIL environment variable for better API rate limits
 - Works on any Unix-like system (macOS, Linux, WSL)
 
