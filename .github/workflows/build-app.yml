@@ -1,86 +1,51 @@
-name: Build Mac App with Platypus
+name: Build Mac App with Platypus and PyInstaller
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install Platypus
+      - name: Install Dependencies
         run: |
-          # Install Platypus via Homebrew
           brew install --cask platypus
-          # Wait for installation to complete
-          sleep 3
-          # Check if the command line tool is compressed
-          if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
-            sudo gunzip /Applications/Platypus.app/Contents/Resources/platypus_clt.gz
-            sudo mkdir -p /usr/local/share/platypus
-            sudo gunzip /Applications/Platypus.app/Contents/Resources/ScriptExec.gz
-          fi
-          # Install command line tool to /usr/local/bin
-          sudo install /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/
-          sudo install /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
-          sudo rsync -ra /Applications/Platypus.app/Contents/Resources/*.nib /usr/local/share/platypus/
-          # Create the required directory structure and copy ScriptExec
-          sudo mkdir -p /usr/local/share/platypus
-          sudo cp /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
-          # Make sure ScriptExec is executable
-          sudo chmod +x /usr/local/share/platypus/ScriptExec
-          # Verify installation
-          /usr/local/bin/platypus_clt -v
-          # Debug: Check if ScriptExec exists
-          ls -la /usr/local/share/platypus/
-
-      - name: Debug Environment
-        run: |
-          echo "PATH: $PATH"
-          echo "PWD: $PWD"
-          echo "Contents of current directory:"
-          ls -la
-          echo "Contents of Platypus Resources:"
-          ls -la /Applications/Platypus.app/Contents/Resources/
-          echo "Python3 location:"
-          which python3
-          python3 --version
-
-      - name: Install Homebrew
-        run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
-          eval "$(/opt/homebrew/bin/brew shellenv)"
-
-      - name: Install Poppler (for pdftotext)
-        run: |
-          eval "$(/opt/homebrew/bin/brew shellenv)"
           brew install poppler
+          python3 -m pip install --upgrade pip
+          python3 -m pip install pyinstaller requests PyPDF2
 
-      - name: Build App
+      - name: Build Python Executable with PyInstaller
         run: |
-          # delete old version
+          pyinstaller --onefile normalize_filename.py
+
+      - name: Debug PyInstaller Output
+        run: |
+          ls -la dist/
+
+      - name: Build App with Platypus
+        run: |
           rm -rf NameMyPdf.app
-          # Create the app using Platypus command line tool
-          /usr/local/bin/platypus_clt \
+          platypus \
             --name "NameMyPdf" \
             --author "Jay Pfaffman" \
             --app-version "0.1" \
             --bundle-identifier "com.literatecomputing.namemypdf" \
             --interface-type "Progress Bar" \
-            --interpreter "/usr/bin/python3" \
+            --interpreter "/bin/bash" \
             --app-icon "icon.icns" \
             --droppable \
             --file-prompt \
             --background \
             --quit-after-execution \
-            "normalize_filename.py" \
+            "dist/normalize_filename" \
             "NameMyPdf.app"
+
           mkdir -p NameMyPdf.app/Contents/Resources
           cp /opt/homebrew/bin/pdftotext NameMyPdf.app/Contents/Resources/
 
@@ -97,7 +62,6 @@ jobs:
 
       - name: Create DMG
         run: |
-          # Create a DMG for distribution
           mkdir -p dist
           rm -f dist/NameMyPdf.dmg
           hdiutil create -size 50m -fs HFS+ -volname "NameMyPdf" temp.dmg
@@ -110,22 +74,16 @@ jobs:
       - name: Commit and Push Built App
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          # Configure git
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
 
-          # Add the built files
           git add NameMyPdf.app/
           git add dist/NameMyPdf.dmg
 
-          # Check if there are changes to commit
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            # Commit the changes
             git commit -m "Auto-build: Update NameMyPdf.app and DMG [skip ci]"
-            
-            # Push the changes
             git push
           fi
 
