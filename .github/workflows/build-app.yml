@@ -80,6 +80,10 @@ jobs:
           otool -L /usr/local/bin/pdftotext || true
           otool -L /opt/homebrew/bin/pdftotext || true
 
+          # Create lib directories first
+          mkdir -p NameMyPdf.app/Contents/Resources/lib-x86_64
+          mkdir -p NameMyPdf.app/Contents/Resources/lib-arm64
+
           # Copy all required poppler and dependencies for Intel
           if [[ -d /usr/local/lib ]]; then
               find /usr/local/lib -name "libpoppler*" -o -name "libfontconfig*" -o -name "libfreetype*" -o -name "libjpeg*" -o -name "libpng*" -o -name "libtiff*" | \
@@ -127,18 +131,17 @@ jobs:
           cat > NameMyPdf.app/Contents/Resources/README_ShellScript.txt << 'EOF'
           # NameMyPdf - Shell Script Usage
 
-          This app includes universal binaries that work on both Apple Silicon and Intel Macs!
+          This app tries to use your system tools first, with bundled tools as fallback.
 
-          If you need to run the shell script directly:
+          ## Tool Detection Order:
+          1. System-installed tools (via Homebrew) - Most reliable
+          2. Bundled tools (included in app) - May have dependency issues
+          3. Error message with installation instructions
 
-          ## Prerequisites:
-          The app already includes both ARM64 and Intel versions of required tools.
-
-          For standalone use on other systems:
-          1. Install required tools:
-             - macOS: `brew install poppler jq`
-             - Ubuntu/Debian: `sudo apt-get install poppler-utils jq curl`
-             - Other systems: Install poppler, jq, and curl
+          ## For best results:
+          Install tools on your system:
+          - macOS: `brew install poppler jq`
+          - Ubuntu/Debian: `sudo apt-get install poppler-utils jq curl`
 
           ## Usage:
           ./normalize_filename.sh [--email your@email.com] file1.pdf file2.pdf
@@ -149,11 +152,12 @@ jobs:
           - Renames the file automatically
 
           ## Notes:
-          - The bundled tools automatically detect your Mac's architecture (ARM64/Intel)
+          - System tools are preferred (better dependency resolution)
+          - Bundled tools work as fallback but may have library issues
           - Set CROSSREF_EMAIL environment variable for better API rate limits
           - Works on any Unix-like system (macOS, Linux, WSL)
 
-          The shell script provides the same functionality as the compiled app.
+          The shell script provides the same functionality as the app.
           EOF
 
       - name: Verify App Creation

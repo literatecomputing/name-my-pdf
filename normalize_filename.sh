@@ -10,38 +10,34 @@ USER_AGENT="PDF DOI Renamer/1.0 (https://github.com/literatecomputing/name-my-pd
 check_dependencies() {
     local missing_tools=()
     
-    # Check for pdftotext (try bundled version first)
-    if [[ -f "$(dirname "$0")/pdftotext" ]]; then
+    # Check for pdftotext (try system version first, bundled as fallback)
+    if command -v pdftotext >/dev/null 2>&1; then
+        PDFTOTEXT="pdftotext"
+        echo "Using system pdftotext"
+    elif [[ -f "$(dirname "$0")/pdftotext" ]]; then
         PDFTOTEXT="$(dirname "$0")/pdftotext"
+        echo "Using bundled pdftotext"
         # Test if bundled version works
         if ! "$PDFTOTEXT" --version >/dev/null 2>&1; then
-            echo "Warning: Bundled pdftotext has missing dependencies, trying system version..."
-            if command -v pdftotext >/dev/null 2>&1; then
-                PDFTOTEXT="pdftotext"
-            else
-                missing_tools+=("pdftotext (bundled version failed, install with: brew install poppler)")
-            fi
+            echo "Warning: Bundled pdftotext has missing dependencies"
+            missing_tools+=("pdftotext (install with: brew install poppler)")
         fi
-    elif command -v pdftotext >/dev/null 2>&1; then
-        PDFTOTEXT="pdftotext"
     else
         missing_tools+=("pdftotext (install with: brew install poppler)")
     fi
     
-    # Check for jq (try bundled version first)
-    if [[ -f "$(dirname "$0")/jq" ]]; then
+    # Check for jq (try system version first, bundled as fallback)
+    if command -v jq >/dev/null 2>&1; then
+        JQ="jq"
+        echo "Using system jq"
+    elif [[ -f "$(dirname "$0")/jq" ]]; then
         JQ="$(dirname "$0")/jq"
+        echo "Using bundled jq"
         # Test if bundled version works
         if ! "$JQ" --version >/dev/null 2>&1; then
-            echo "Warning: Bundled jq has missing dependencies, trying system version..."
-            if command -v jq >/dev/null 2>&1; then
-                JQ="jq"
-            else
-                missing_tools+=("jq (bundled version failed, install with: brew install jq)")
-            fi
+            echo "Warning: Bundled jq has missing dependencies"
+            missing_tools+=("jq (install with: brew install jq)")
         fi
-    elif command -v jq >/dev/null 2>&1; then
-        JQ="jq"
     else
         missing_tools+=("jq (install with: brew install jq)")
     fi
@@ -53,7 +49,7 @@ check_dependencies() {
         echo "Missing required tools:"
         printf "  %s\n" "${missing_tools[@]}"
         echo ""
-        echo "For Intel Macs, you may need to install tools manually:"
+        echo "For best compatibility, install tools manually:"
         echo "  brew install poppler jq"
         exit 1
     fi
