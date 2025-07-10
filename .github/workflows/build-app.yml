@@ -52,10 +52,10 @@ jobs:
           python3 --version
 
       - name: Install Homebrew
-          run: |
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
-            eval "$(/opt/homebrew/bin/brew shellenv)"
+        run: |
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
+          eval "$(/opt/homebrew/bin/brew shellenv)"
 
       - name: Install Poppler (for pdftotext)
         run: |
@@ -64,7 +64,7 @@ jobs:
 
       - name: Build App
         run: |
-          # delet old version
+          # delete old version
           rm -rf NameMyPdf.app
           # Create the app using Platypus command line tool
           /usr/local/bin/platypus_clt \
