@@ -94,7 +94,31 @@ jobs:
             exit 1
           fi
 
-      - name: Create DMG
+      - name: Import Code-Signing Certificates
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.DEVELOPER_ID_APPLICATION_P12 }}
+          p12-password: ${{ secrets.DEVELOPER_ID_APPLICATION_PASSWORD }}
+
+      - name: Import Installer Certificate
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          p12-file-base64: ${{ secrets.DEVELOPER_ID_INSTALLER_P12 }}
+          p12-password: ${{ secrets.DEVELOPER_ID_INSTALLER_PASSWORD }}
+
+      - name: Sign App Bundle
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Sign the app bundle
+          codesign --force --options runtime --deep --sign "Developer ID Application: Your Name (TEAM_ID)" NameMyPdf.app
+
+          # Verify signing
+          codesign --verify --verbose NameMyPdf.app
+          spctl --assess --verbose NameMyPdf.app
+
+      - name: Create and Sign DMG
         run: |
           mkdir -p dist
           rm -f dist/NameMyPdf.dmg
@@ -104,6 +128,29 @@ jobs:
           hdiutil detach /Volumes/NameMyPdf
           hdiutil convert temp.dmg -format UDZO -o dist/NameMyPdf.dmg
           rm temp.dmg
+
+      - name: Sign DMG
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Sign the DMG
+          codesign --force --sign "Developer ID Application: Your Name (TEAM_ID)" dist/NameMyPdf.dmg
+
+          # Verify DMG signing
+          codesign --verify --verbose dist/NameMyPdf.dmg
+          spctl --assess --type open --context context:primary-signature --verbose dist/NameMyPdf.dmg
+
+      - name: Notarize DMG
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Submit for notarization
+          xcrun notarytool submit dist/NameMyPdf.dmg \
+            --apple-id "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.APPLE_APP_PASSWORD }}" \
+            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
+            --wait
+
+          # Staple the notarization
+          xcrun stapler staple dist/NameMyPdf.dmg
 
       - name: Commit and Push Built App
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
