@@ -100,6 +100,8 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.DEVELOPER_ID_APPLICATION_P12 }}
           p12-password: ${{ secrets.DEVELOPER_ID_APPLICATION_PASSWORD }}
+          keychain: signing_temp_${{ github.run_id }}
+          create-keychain: true
 
       - name: Import Installer Certificate
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -107,6 +109,8 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.DEVELOPER_ID_INSTALLER_P12 }}
           p12-password: ${{ secrets.DEVELOPER_ID_INSTALLER_PASSWORD }}
+          keychain: signing_temp_${{ github.run_id }}
+          create-keychain: false
 
       - name: Sign App Bundle
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
