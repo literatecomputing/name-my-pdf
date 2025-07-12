@@ -112,7 +112,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # Sign the app bundle
-          codesign --force --options runtime --deep --sign "Developer ID Application: Your Name (TEAM_ID)" NameMyPdf.app
+          codesign --force --options runtime --deep --sign "Developer ID Application: Jay Pfaffman (B9YN7Q93P9)" NameMyPdf.app
 
           # Verify signing
           codesign --verify --verbose NameMyPdf.app
@@ -133,24 +133,10 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # Sign the DMG
-          codesign --force --sign "Developer ID Application: Your Name (TEAM_ID)" dist/NameMyPdf.dmg
-
+          codesign --force --sign "Developer ID Application: Jay Pfaffman (B9YN7Q93P9)" dist/NameMyPdf.dmg
           # Verify DMG signing
           codesign --verify --verbose dist/NameMyPdf.dmg
           spctl --assess --type open --context context:primary-signature --verbose dist/NameMyPdf.dmg
-
-      - name: Notarize DMG
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          # Submit for notarization
-          xcrun notarytool submit dist/NameMyPdf.dmg \
-            --apple-id "${{ secrets.APPLE_ID }}" \
-            --password "${{ secrets.APPLE_APP_PASSWORD }}" \
-            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
-            --wait
-
-          # Staple the notarization
-          xcrun stapler staple dist/NameMyPdf.dmg
 
       - name: Commit and Push Built App
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
