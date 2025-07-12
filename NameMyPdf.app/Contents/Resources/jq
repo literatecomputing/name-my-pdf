@@ -1,8 +1,0 @@
-#!/bin/bash
-ARCH=$(uname -m)
-SCRIPT_DIR="$(dirname "$0")"
-if [[ "$ARCH" == "arm64" ]]; then
-    exec "$SCRIPT_DIR/jq-arm64" "$@"
-else
-    exec "$SCRIPT_DIR/jq-x86_64" "$@"
-fi
