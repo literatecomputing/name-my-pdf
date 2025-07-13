@@ -96,21 +96,24 @@ jobs:
 
       - name: Import Code-Signing Certificates
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: Apple-Actions/import-codesign-certs@v2
-        with:
-          p12-file-base64: ${{ secrets.DEVELOPER_ID_APPLICATION_P12 }}
-          p12-password: ${{ secrets.DEVELOPER_ID_APPLICATION_PASSWORD }}
-          keychain: signing_temp_${{ github.run_id }}
-          create-keychain: true
+        run: |
+          # Create keychain
+          security create-keychain -p "temp_password" signing_temp.keychain
+          security default-keychain -s signing_temp.keychain
+          security unlock-keychain -p "temp_password" signing_temp.keychain
 
-      - name: Import Installer Certificate
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: Apple-Actions/import-codesign-certs@v2
-        with:
-          p12-file-base64: ${{ secrets.DEVELOPER_ID_INSTALLER_P12 }}
-          p12-password: ${{ secrets.DEVELOPER_ID_INSTALLER_PASSWORD }}
-          keychain: signing_temp_${{ github.run_id }}
-          create-keychain: false
+          # Import certificates
+          echo "${{ secrets.DEVELOPER_ID_APPLICATION_P12 }}" | base64 --decode > app_cert.p12
+          echo "${{ secrets.DEVELOPER_ID_INSTALLER_P12 }}" | base64 --decode > installer_cert.p12
+
+          security import app_cert.p12 -k signing_temp.keychain -P "${{ secrets.DEVELOPER_ID_APPLICATION_PASSWORD }}" -T /usr/bin/codesign
+          security import installer_cert.p12 -k signing_temp.keychain -P "${{ secrets.DEVELOPER_ID_INSTALLER_PASSWORD }}" -T /usr/bin/codesign
+
+          # Set partition list
+          security set-key-partition-list -S apple-tool:,apple: -s -k "temp_password" signing_temp.keychain
+
+          # Clean up certificate files
+          rm app_cert.p12 installer_cert.p12
 
       - name: Sign App Bundle
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
