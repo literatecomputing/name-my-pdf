@@ -123,7 +123,33 @@ jobs:
 
           # Verify signing
           codesign --verify --verbose NameMyPdf.app
+
+      - name: Notarize App
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Create a ZIP for notarization
+          ditto -c -k --keepParent NameMyPdf.app NameMyPdf.zip
+
+          # Submit for notarization
+          xcrun notarytool submit NameMyPdf.zip \
+            --apple-id "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.APPLE_APP_PASSWORD }}" \
+            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
+            --wait
+
+          # Staple the notarization
+          xcrun stapler staple NameMyPdf.app
+
+          # Clean up
+          rm NameMyPdf.zip
+
+      - name: Verify Notarization
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          # Verify the app is properly signed and notarized
+          codesign --verify --verbose NameMyPdf.app
           spctl --assess --verbose NameMyPdf.app
+          xcrun stapler validate NameMyPdf.app
 
       - name: Create and Sign DMG
         run: |
