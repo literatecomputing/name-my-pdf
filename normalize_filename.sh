@@ -18,6 +18,11 @@
 if [[ ! -f ~/.namemypdfrc ]];then
   echo "Creating ~/.namemypdfrc -- edit to change how files are named"
   cat <<EOF > ~/.namemypdfrc
+# This is the configuration file for NameMyPdf. You can change
+# these settings to control how your PDFs are renamed.
+#
+# Hopefully, the settings are clear from their names. . .
+#
 # Optionally let crossref know it's you--recommended if you're naming hundreds of files
 # CROSSREF_EMAIL=you@email.com
 DOWNCASE_TITLE=false
@@ -29,34 +34,53 @@ USE_ABBR_TITLE=false  # use only first letter of title words
 STRIP_TITLE_POST_COLON=true # shorten title to before the colon
 DEBUG=false
 EOF
+  open -e ~/.namemypdfrc
 fi
 source ~/.namemypdfrc
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  # check if brew bin diretory exists and is in path
-  if [[ ! -d "/opt/homebrew/bin" ]]; then
-    echo "Install homebrew: https://brew.sh/"
-    open "https://brew.sh/"
+  got_brew=false
+  # check if brew bin diretory exists and is in pat
+  if [[ -d "/opt/homebrew/bin" ]]; then
+    got_brew=true
+    if ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
+      export PATH="/opt/homebrew/bin:$PATH"
+    fi
   fi
-  if [[ -d "/opt/homebrew/bin" && ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
-    export PATH="/opt/homebrew/bin:$PATH"
+  if [[ -f "/usr/local/bin/brew" ]]; then
+    got_brew=true
+    if [[ ":$PATH:" != *":/usr/local/bin:"* ]]; then
+      export PATH="/usr/local/bin:$PATH"
+    fi
+  fi
+  if [[ ! $got_brew ]];then
+    echo "ALERT:Configuration|Homebrew is required"
   fi
 fi
 
 if ! command -v pdftotext &> /dev/null
 then
     echo "pdftotext is missing. Please install poppler-utils or on a mac 'brew install poppler'"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      echo "ALERT:Configuration|Install poppler in a terminal with 'brew install poppler"
+    fi
     exit
 fi
 if ! command -v jq &> /dev/null
 then
     echo "jq is missing. Please install jq or on a mac 'brew install jq'"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      echo "ALERT:Configuration|Install jq in a terminal with 'brew install jq"
+    fi
     exit
 fi
 if ! command -v curl &> /dev/null
 then
     echo "curl is missing. Please install curl or on a mac 'brew install curl'"
-    exit
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      echo "ALERT:Configuration|Install curl in a terminal with 'brew install curl"
+      exit
+    fi
 fi
 
 
@@ -68,7 +92,7 @@ get_doi_from_pdf_file() {
   # grep: get the line with the DOI (but that's the whole thing?
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
-  DOI=$(pdftotext "$pdf" -l 2  -  |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 )
+  DOI=$(pdftotext "$pdf" -l 2  -  2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*' 2> /dev/null|tail -1 )
   echo $DOI
 }
 
@@ -80,7 +104,7 @@ get_doi_url_from_pdf_file() {
   # grep: get the line with the DOI (but that's the whole thing?
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
-  DOI=$(pdftotext "$pdf" -l 1  -  |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 | awk '{print "https://doi.org/"$1}')
+  DOI=$(pdftotext "$pdf" -l 1  -   2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 | awk '{print "https://doi.org/"$1}')
   echo "get_doi_url_from_pdf_file: $DOI"
   echo $DOI
 }
@@ -206,7 +230,7 @@ for item in "$@"; do
   if [[ -f "$target_path" ]]; then
     echo "Target file already exists: $target_path"
   else
-    echo "Renaming: $ITEM_ABS_PATH -> $target_path"
+    echo "Renaming: $item -> $target_filename"
     mv "$ITEM_ABS_PATH" "$target_path"
   fi
 done
