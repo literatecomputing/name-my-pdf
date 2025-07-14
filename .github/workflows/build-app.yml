@@ -2,9 +2,9 @@ name: Build Mac App with Platypus
 
 on:
   push:
-    branches: [main]
+    branches: [build]
   pull_request:
-    branches: [main]
+    branches: [build]
   workflow_dispatch: # This enables manual triggering
 
 jobs:
