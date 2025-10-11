@@ -96,15 +96,15 @@ jobs:
           echo "Downloading jq binaries..."
           curl -L -o jq-macos-amd64 https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-amd64
           curl -L -o jq-macos-arm64 https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-arm64
-          
+
           # Make them executable
           chmod +x jq-macos-amd64 jq-macos-arm64
-          
+
           # Create universal binary for jq
           echo "Creating universal jq binary..."
           lipo -create jq-macos-amd64 jq-macos-arm64 -output jq
           chmod +x jq
-          
+
           # Verify jq
           file jq
           ./jq --version
@@ -113,20 +113,20 @@ jobs:
           echo "Downloading Xpdf tools..."
           curl -L -o xpdf-tools-mac-4.05.tar.gz https://dl.xpdfreader.com/xpdf-tools-mac-4.05.tar.gz
           tar -xzf xpdf-tools-mac-4.05.tar.gz
-          
+
           # Extract pdftotext binaries for both architectures
           echo "Extracting pdftotext binaries..."
           cp xpdf-tools-mac-4.05/bin64/pdftotext pdftotext-x86_64
           cp xpdf-tools-mac-4.05/binARM/pdftotext pdftotext-arm64
-          
+
           # Make them executable
           chmod +x pdftotext-x86_64 pdftotext-arm64
-          
+
           # Create universal binary for pdftotext
           echo "Creating universal pdftotext binary..."
           lipo -create pdftotext-x86_64 pdftotext-arm64 -output pdftotext
           chmod +x pdftotext
-          
+
           # Verify pdftotext
           file pdftotext
           ./pdftotext -v || true  # pdftotext returns non-zero exit code when showing version
@@ -138,7 +138,7 @@ jobs:
           # List final binaries
           echo "Final bundled binaries:"
           ls -lah
-          
+
           cd ..
 
       - name: Build app with Platypus
