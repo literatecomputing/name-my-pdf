@@ -56,14 +56,25 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
-# Find tools explicitly - check common Homebrew locations
+# Find tools explicitly - check bundled binaries first, then common Homebrew locations
 find_tool() {
   local tool=$1
-  # First try command -v (uses PATH)
+  
+  # Get the directory of the script (handles being run from within app bundle)
+  local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  
+  # First check if we have a bundled binary (in the same directory as the script)
+  if [[ -f "$script_dir/$tool" ]] && [[ -x "$script_dir/$tool" ]]; then
+    echo "$script_dir/$tool"
+    return 0
+  fi
+  
+  # Then try command -v (uses PATH)
   if command -v "$tool" &> /dev/null; then
     command -v "$tool"
     return 0
   fi
+  
   # Then check Homebrew locations directly
   if [[ -f "/opt/homebrew/bin/$tool" ]]; then
     echo "/opt/homebrew/bin/$tool"

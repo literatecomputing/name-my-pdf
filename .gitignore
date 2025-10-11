@@ -6,6 +6,7 @@ keys
 *.dmg
 NameMyPdf.app
 dmg-contents/
+bundled-bin/
 
 # macOS system files
 .DS_Store

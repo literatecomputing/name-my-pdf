@@ -34,15 +34,15 @@ jobs:
         run: |
           # Install Platypus for app building
           brew install --cask platypus
-          
+
           # List what's actually in the Platypus app bundle
           echo "Contents of Platypus Resources:"
           ls -la /Applications/Platypus.app/Contents/Resources/
-          
+
           # Set up Platypus command-line tool
           sudo mkdir -p /usr/local/bin
           sudo mkdir -p /usr/local/share/platypus
-          
+
           # Check if platypus_clt exists (may be gzipped or have different name)
           if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt ]; then
             sudo cp /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/platypus
@@ -60,7 +60,7 @@ jobs:
               exit 1
             fi
           fi
-          
+
           # Copy ScriptExec
           if [ -f /Applications/Platypus.app/Contents/Resources/ScriptExec ]; then
             sudo cp /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
@@ -68,24 +68,78 @@ jobs:
             sudo gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /tmp/ScriptExec
             sudo mv /tmp/ScriptExec /usr/local/share/platypus/ScriptExec
           fi
-          
+
           # Copy nib files
           if [ -d /Applications/Platypus.app/Contents/Resources/MainMenu.nib ]; then
             sudo cp -R /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/
           fi
-          
+
           # Make executables
           sudo chmod +x /usr/local/bin/platypus
           if [ -f /usr/local/share/platypus/ScriptExec ]; then
             sudo chmod +x /usr/local/share/platypus/ScriptExec
           fi
-          
+
           # Verify installation
           which platypus
           platypus -v
 
           # Install create-dmg for DMG creation
           brew install create-dmg
+
+      - name: Download and prepare bundled binaries
+        run: |
+          mkdir -p bundled-bin
+          cd bundled-bin
+
+          # Download jq binaries for both architectures
+          echo "Downloading jq binaries..."
+          curl -L -o jq-macos-amd64 https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-amd64
+          curl -L -o jq-macos-arm64 https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-arm64
+          
+          # Make them executable
+          chmod +x jq-macos-amd64 jq-macos-arm64
+          
+          # Create universal binary for jq
+          echo "Creating universal jq binary..."
+          lipo -create jq-macos-amd64 jq-macos-arm64 -output jq
+          chmod +x jq
+          
+          # Verify jq
+          file jq
+          ./jq --version
+
+          # Download Xpdf tools (contains pdftotext)
+          echo "Downloading Xpdf tools..."
+          curl -L -o xpdf-tools-mac-4.05.tar.gz https://dl.xpdfreader.com/xpdf-tools-mac-4.05.tar.gz
+          tar -xzf xpdf-tools-mac-4.05.tar.gz
+          
+          # Extract pdftotext binaries for both architectures
+          echo "Extracting pdftotext binaries..."
+          cp xpdf-tools-mac-4.05/bin64/pdftotext pdftotext-x86_64
+          cp xpdf-tools-mac-4.05/bin-arm64/pdftotext pdftotext-arm64
+          
+          # Make them executable
+          chmod +x pdftotext-x86_64 pdftotext-arm64
+          
+          # Create universal binary for pdftotext
+          echo "Creating universal pdftotext binary..."
+          lipo -create pdftotext-x86_64 pdftotext-arm64 -output pdftotext
+          chmod +x pdftotext
+          
+          # Verify pdftotext
+          file pdftotext
+          ./pdftotext -v
+
+          # Clean up source files
+          rm -f jq-macos-amd64 jq-macos-arm64 pdftotext-x86_64 pdftotext-arm64
+          rm -rf xpdf-tools-mac-4.05 xpdf-tools-mac-4.05.tar.gz
+
+          # List final binaries
+          echo "Final bundled binaries:"
+          ls -lah
+          
+          cd ..
 
       - name: Build app with Platypus
         run: |
@@ -94,7 +148,7 @@ jobs:
             echo "Removing pre-existing NameMyPdf.app from checkout"
             rm -rf NameMyPdf.app
           fi
-          
+
           # Debug: Show what we have in the current directory
           echo "=== Files in current directory ==="
           ls -la
@@ -102,7 +156,7 @@ jobs:
           head -50 normalize_filename.sh
           echo "=== Checking for DEBUG lines in source ==="
           grep "DEBUG:" normalize_filename.sh || echo "No DEBUG in source file!"
-          
+
           # Create the app using Platypus
           platypus \
             --name "NameMyPdf" \
@@ -118,6 +172,8 @@ jobs:
             --quit-after-execution \
             --suffixes "pdf" \
             --uniform-type-identifiers "com.adobe.pdf" \
+            --bundled-file "bundled-bin/jq" \
+            --bundled-file "bundled-bin/pdftotext" \
             --overwrite \
             "normalize_filename.sh" \
             "NameMyPdf.app"
@@ -179,19 +235,22 @@ jobs:
             1. Download the `.dmg` file
             2. Double-click to mount the disk image
             3. Drag `NameMyPdf.app` to the Applications folder
-            4. Install dependencies: `brew install poppler jq`
-            5. Right-click the app and select "Open" for first launch
+            4. Right-click the app and select "Open" for first launch (Gatekeeper requirement)
 
             #### ZIP Installation
             1. Download and extract the `.zip` file
             2. Move `NameMyPdf.app` to your Applications folder
-            3. Install dependencies: `brew install poppler jq`
-            4. Right-click the app and select "Open" for first launch
+            3. Right-click the app and select "Open" for first launch (Gatekeeper requirement)
 
             ### System Requirements
             - macOS 10.11.0 (El Capitan) or later
             - Universal binary (Intel & Apple Silicon)
-            - Dependencies: `poppler`, `jq` (install via Homebrew)
+            - **No external dependencies required** - all tools are bundled!
+
+            ### What's New
+            - ✨ **Standalone app** - No need to install Homebrew, poppler, or jq
+            - 🔧 Bundled binaries: `pdftotext` (from Xpdf 4.05) and `jq` (1.7.1)
+            - 🍎 Universal binaries work natively on both Intel and Apple Silicon Macs
 
             ### Usage
             Drag PDF files with DOI information onto the app icon to automatically rename them in the format: `Author Year - Title.pdf`
