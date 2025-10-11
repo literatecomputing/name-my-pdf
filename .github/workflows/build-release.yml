@@ -114,6 +114,10 @@ jobs:
         run: |
           ls -la NameMyPdf.app/Contents/
           file NameMyPdf.app/Contents/MacOS/NameMyPdf
+          echo "=== Checking bundled script ==="
+          head -20 NameMyPdf.app/Contents/Resources/script
+          echo "=== Looking for DEBUG lines ==="
+          grep "DEBUG:" NameMyPdf.app/Contents/Resources/script || echo "No DEBUG lines found"
 
       - name: Create ZIP archive
         run: |
