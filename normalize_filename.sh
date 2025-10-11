@@ -13,7 +13,15 @@ exec 1> >(tee -a "$LOGFILE")
 exec 2>&1
 echo "==================== $(date) ===================="
 echo "Script started with arguments: $@"
+echo "Number of arguments: $#"
 echo "Working directory: $(pwd)"
+echo "Environment variables:"
+env | grep -i platypus || true
+env | grep -i drop || true
+echo "All arguments:"
+for i in "$@"; do
+  echo "  arg: $i"
+done
 
 ## OMG. Looks like this would have been much, much, simpler this way
 # https://www.crossref.org/documentation/retrieve-metadata/xml-api/using-https-to-query/#00418
@@ -171,6 +179,14 @@ capitalize_author_name() {
     echo "$name"
   fi
 }
+
+# Check if any files were provided
+if [ $# -eq 0 ]; then
+  echo "ERROR: No files provided!"
+  echo "Please drag and drop PDF files onto the NameMyPdf app icon."
+  osascript -e 'display alert "NameMyPdf" message "Please drag and drop PDF files onto the NameMyPdf app icon to rename them." as warning'
+  exit 1
+fi
 
 for item in "$@"; do
   # Get full path for the input file

@@ -168,7 +168,6 @@ jobs:
             --interpreter "/bin/bash" \
             --droppable \
             --text-droppable \
-            --background \
             --quit-after-execution \
             --suffixes "pdf" \
             --uniform-type-identifiers "com.adobe.pdf" \
