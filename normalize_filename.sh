@@ -7,22 +7,6 @@
 # This might be a more rubust way to get the DOI: https?:\/\/.*?doi\.org\/(10\.[0-9]*?\/.*)\s|DOI:?\s?(10\..*?\/.*?)\s
 # It'll find old-style DOIs like DOI: 10.1002/2017GL074677 or new-style DOIs like https://doi.org/10.1002/2017GL074677
 
-# Set up logging for when run as an app
-LOGFILE="$HOME/Library/Logs/NameMyPdf.log"
-exec 1> >(tee -a "$LOGFILE")
-exec 2>&1
-echo "==================== $(date) ===================="
-echo "Script started with arguments: $@"
-echo "Number of arguments: $#"
-echo "Working directory: $(pwd)"
-echo "Environment variables:"
-env | grep -i platypus || true
-env | grep -i drop || true
-echo "All arguments:"
-for i in "$@"; do
-  echo "  arg: $i"
-done
-
 ## OMG. Looks like this would have been much, much, simpler this way
 # https://www.crossref.org/documentation/retrieve-metadata/xml-api/using-https-to-query/#00418
 # curl https://doi.crossref.org/servlet/query?pid=$CROSSREF_EMAIL&id=$DOI
@@ -138,7 +122,6 @@ if [[ -z "$CURL" ]]; then
     exit 1
 fi
 
-
 get_doi_from_pdf_file() {
   local pdf="$1"
   # pdftotext: get first page of PDF
@@ -161,7 +144,7 @@ get_doi_url_from_pdf_file() {
   # grep: get the line with the DOI (but that's the whole thing?
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
-  DOI=$("$PDFTOTEXT" "$pdf" -l 1  -   2> /dev/null | iconv -c -f utf-8 -t utf-8 2> /dev/null | tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 | awk '{print "https://doi.org/"$1}')
+  DOI=$("$PDFTOTEXT"  -l 2 "$pdf" -   2> /dev/null | iconv -c -f utf-8 -t utf-8 2> /dev/null | tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 | awk '{print "https://doi.org/"$1}')
   echo "get_doi_url_from_pdf_file: $DOI"
   echo $DOI
 }
@@ -179,14 +162,6 @@ capitalize_author_name() {
     echo "$name"
   fi
 }
-
-# Check if any files were provided
-if [ $# -eq 0 ]; then
-  echo "ERROR: No files provided!"
-  echo "Please drag and drop PDF files onto the NameMyPdf app icon."
-  osascript -e 'display alert "NameMyPdf" message "Please drag and drop PDF files onto the NameMyPdf app icon to rename them." as warning'
-  exit 1
-fi
 
 for item in "$@"; do
   # Get full path for the input file
