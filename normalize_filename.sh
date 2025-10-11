@@ -81,6 +81,12 @@ PDFTOTEXT=$(find_tool pdftotext)
 JQ=$(find_tool jq)
 CURL=$(find_tool curl)
 
+# Debug: Show what we found
+echo "DEBUG: PDFTOTEXT=$PDFTOTEXT"
+echo "DEBUG: JQ=$JQ"
+echo "DEBUG: CURL=$CURL"
+echo "DEBUG: PATH=$PATH"
+
 if [[ -z "$PDFTOTEXT" ]]; then
     echo "pdftotext is missing. Please install poppler-utils or on a mac 'brew install poppler'"
     if [[ "$OSTYPE" == "darwin"* ]]; then
