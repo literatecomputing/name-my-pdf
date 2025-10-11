@@ -129,7 +129,7 @@ jobs:
           
           # Verify pdftotext
           file pdftotext
-          ./pdftotext -v
+          ./pdftotext -v || true  # pdftotext returns non-zero exit code when showing version
 
           # Clean up source files
           rm -f jq-macos-amd64 jq-macos-arm64 pdftotext-x86_64 pdftotext-arm64
