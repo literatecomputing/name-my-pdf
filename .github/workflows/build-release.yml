@@ -33,28 +33,32 @@ jobs:
       - name: Install dependencies
         run: |
           # Install Platypus for app building
-          brew install platypus
+          brew install --cask platypus
+          
+          # Set up Platypus command-line tool
+          sudo mkdir -p /usr/local/bin
+          sudo mkdir -p /usr/local/share/platypus
+          
+          # Install the command-line tool from the app
+          sudo cp /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/platypus
+          sudo cp /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
+          sudo cp -R /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/
+          
+          # Make executables
+          sudo chmod +x /usr/local/bin/platypus
+          sudo chmod +x /usr/local/share/platypus/ScriptExec
+          
+          # Verify installation
+          which platypus
+          platypus -v
 
           # Install create-dmg for DMG creation
           brew install create-dmg
 
       - name: Build app with Platypus
         run: |
-          # Find the correct Platypus path (handles both Intel and Apple Silicon)
-          PLATYPUS_PATH=""
-          if [ -f "/opt/homebrew/bin/platypus" ]; then
-            PLATYPUS_PATH="/opt/homebrew/bin/platypus"
-          elif [ -f "/usr/local/bin/platypus" ]; then
-            PLATYPUS_PATH="/usr/local/bin/platypus"
-          else
-            echo "Error: Platypus not found in expected locations"
-            exit 1
-          fi
-          
-          echo "Using Platypus at: $PLATYPUS_PATH"
-          
           # Create the app using Platypus
-          "$PLATYPUS_PATH" \
+          platypus \
             --name "NameMyPdf" \
             --app-icon "icon.icns" \
             --bundle-identifier "com.literatecomputing.namemypdf" \
