@@ -40,18 +40,16 @@ source ~/.namemypdfrc
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   got_brew=false
-  # check if brew bin diretory exists and is in pat
+  # Add Homebrew paths to PATH for both Intel and Apple Silicon
+  # Apple Silicon path
   if [[ -d "/opt/homebrew/bin" ]]; then
     got_brew=true
-    if ":$PATH:" != *":/opt/homebrew/bin:"* ]]; then
-      export PATH="/opt/homebrew/bin:$PATH"
-    fi
+    export PATH="/opt/homebrew/bin:$PATH"
   fi
-  if [[ -f "/usr/local/bin/brew" ]]; then
+  # Intel path
+  if [[ -d "/usr/local/bin" ]]; then
     got_brew=true
-    if [[ ":$PATH:" != *":/usr/local/bin:"* ]]; then
-      export PATH="/usr/local/bin:$PATH"
-    fi
+    export PATH="/usr/local/bin:$PATH"
   fi
   if [[ ! $got_brew ]];then
     echo "ALERT:Configuration|Homebrew is required"
