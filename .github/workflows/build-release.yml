@@ -1,0 +1,147 @@
+name: Build and Release NameMyPdf
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number (e.g., 1.0.1)"
+        required: true
+        default: "1.0.0"
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Install dependencies
+        run: |
+          # Install Platypus for app building
+          brew install platypus
+
+          # Install create-dmg for DMG creation
+          brew install create-dmg
+
+      - name: Build app with Platypus
+        run: |
+          # Create the app using Platypus
+          /usr/local/bin/platypus \
+            --name "NameMyPdf" \
+            --app-icon "icon.icns" \
+            --bundle-identifier "com.literatecomputing.namemypdf" \
+            --author "Jay Pfaffman" \
+            --app-version "${{ steps.version.outputs.VERSION }}" \
+            --interface-type "Droplet" \
+            --interpreter "/bin/bash" \
+            --accepts-files \
+            --accepts-text \
+            --droppable \
+            --background \
+            --quit-after-execution \
+            --text-droppable \
+            --file-types "pdf" \
+            --uniform-type-identifiers "com.adobe.pdf" \
+            --minimum-version "10.11.0" \
+            "normalize_filename.sh" \
+            "NameMyPdf.app"
+
+      - name: Verify app bundle
+        run: |
+          ls -la NameMyPdf.app/Contents/
+          file NameMyPdf.app/Contents/MacOS/NameMyPdf
+
+      - name: Create ZIP archive
+        run: |
+          zip -r "NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip" "NameMyPdf.app" --exclude="*.DS_Store"
+
+      - name: Create DMG
+        run: |
+          # Create a temporary directory for DMG contents
+          mkdir -p dmg-contents
+          cp -R NameMyPdf.app dmg-contents/
+
+          # Create the DMG with drag-to-Applications functionality
+          create-dmg \
+            --volname "NameMyPdf v${{ steps.version.outputs.VERSION }}" \
+            --volicon "icon.icns" \
+            --window-pos 200 120 \
+            --window-size 800 450 \
+            --icon-size 100 \
+            --icon "NameMyPdf.app" 200 190 \
+            --hide-extension "NameMyPdf.app" \
+            --app-drop-link 600 190 \
+            --hdiutil-quiet \
+            "NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg" \
+            "dmg-contents/"
+
+      - name: Verify build outputs
+        run: |
+          ls -la NameMyPdf-v${{ steps.version.outputs.VERSION }}.*
+          echo "ZIP size: $(ls -lh NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip | awk '{print $5}')"
+          echo "DMG size: $(ls -lh NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg | awk '{print $5}')"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: "NameMyPdf v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## NameMyPdf v${{ steps.version.outputs.VERSION }}
+
+            ### Download Options
+            - **DMG (Recommended)**: `NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg` - Drag and drop installer
+            - **ZIP Archive**: `NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip` - Manual installation
+
+            ### Installation
+
+            #### DMG Installation (Recommended)
+            1. Download the `.dmg` file
+            2. Double-click to mount the disk image
+            3. Drag `NameMyPdf.app` to the Applications folder
+            4. Install dependencies: `brew install poppler jq`
+            5. Right-click the app and select "Open" for first launch
+
+            #### ZIP Installation
+            1. Download and extract the `.zip` file
+            2. Move `NameMyPdf.app` to your Applications folder
+            3. Install dependencies: `brew install poppler jq`
+            4. Right-click the app and select "Open" for first launch
+
+            ### System Requirements
+            - macOS 10.11.0 (El Capitan) or later
+            - Universal binary (Intel & Apple Silicon)
+            - Dependencies: `poppler`, `jq` (install via Homebrew)
+
+            ### Usage
+            Drag PDF files with DOI information onto the app icon to automatically rename them in the format: `Author Year - Title.pdf`
+
+          files: |
+            NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg
+            NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip
+          draft: false
+          prerelease: false
+
+      - name: Upload artifacts (for manual workflow runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v3
+        with:
+          name: NameMyPdf-v${{ steps.version.outputs.VERSION }}
+          path: |
+            NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg
+            NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip
