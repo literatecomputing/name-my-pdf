@@ -110,14 +110,33 @@ jobs:
           ./jq --version
 
           # Download Xpdf tools (contains pdftotext)
-          echo "Downloading Xpdf tools..."
-          curl -L -o xpdf-tools-mac-4.05.tar.gz https://dl.xpdfreader.com/xpdf-tools-mac-4.05.tar.gz
-          tar -xzf xpdf-tools-mac-4.05.tar.gz
+          echo "Downloading Xpdf tools for Intel..."
+          curl -L -o xpdf-tools-mac-x86_64-4.05.tar.gz https://dl.xpdfreader.com/xpdf-tools-mac-4.05.tar.gz
+          tar -xzf xpdf-tools-mac-x86_64-4.05.tar.gz
+          
+          echo "Downloading Xpdf tools for ARM..."
+          curl -L -o xpdf-tools-mac-arm64-4.05.tar.gz https://dl.xpdfreader.com/xpdf-tools-mac-arm64-4.05.tar.gz
+          tar -xzf xpdf-tools-mac-arm64-4.05.tar.gz
+          
+          # List contents to see structure
+          echo "Contents of extracted archives:"
+          ls -la
           
           # Extract pdftotext binaries for both architectures
           echo "Extracting pdftotext binaries..."
-          cp xpdf-tools-mac-4.05/bin64/pdftotext pdftotext-x86_64
-          cp xpdf-tools-mac-4.05/bin-arm64/pdftotext pdftotext-arm64
+          # Find and copy the Intel version
+          if [ -f xpdf-tools-mac-4.05/bin64/pdftotext ]; then
+            cp xpdf-tools-mac-4.05/bin64/pdftotext pdftotext-x86_64
+          elif [ -f xpdf-tools-mac-4.05/bin/pdftotext ]; then
+            cp xpdf-tools-mac-4.05/bin/pdftotext pdftotext-x86_64
+          fi
+          
+          # Find and copy the ARM version
+          if [ -f xpdf-tools-mac-arm64-4.05/bin64/pdftotext ]; then
+            cp xpdf-tools-mac-arm64-4.05/bin64/pdftotext pdftotext-arm64
+          elif [ -f xpdf-tools-mac-arm64-4.05/bin/pdftotext ]; then
+            cp xpdf-tools-mac-arm64-4.05/bin/pdftotext pdftotext-arm64
+          fi
           
           # Make them executable
           chmod +x pdftotext-x86_64 pdftotext-arm64
@@ -133,7 +152,8 @@ jobs:
 
           # Clean up source files
           rm -f jq-macos-amd64 jq-macos-arm64 pdftotext-x86_64 pdftotext-arm64
-          rm -rf xpdf-tools-mac-4.05 xpdf-tools-mac-4.05.tar.gz
+          rm -rf xpdf-tools-mac-4.05 xpdf-tools-mac-arm64-4.05
+          rm -f xpdf-tools-mac-x86_64-4.05.tar.gz xpdf-tools-mac-arm64-4.05.tar.gz
 
           # List final binaries
           echo "Final bundled binaries:"
