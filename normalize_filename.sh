@@ -131,7 +131,7 @@ get_doi_from_pdf_file() {
   # grep: get the line with the DOI (but that's the whole thing?
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
-  DOI=$("$PDFTOTEXT" "$pdf" -l 2  -  2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*' 2> /dev/null|tail -1 )
+  DOI=$("$PDFTOTEXT" -l 2  "$pdf" -  2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*' 2> /dev/null|tail -1 )
   echo $DOI
 }
 
