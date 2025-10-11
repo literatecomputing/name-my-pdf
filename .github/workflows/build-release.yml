@@ -89,6 +89,14 @@ jobs:
 
       - name: Build app with Platypus
         run: |
+          # Debug: Show what we have in the current directory
+          echo "=== Files in current directory ==="
+          ls -la
+          echo "=== First 50 lines of normalize_filename.sh ==="
+          head -50 normalize_filename.sh
+          echo "=== Checking for DEBUG lines in source ==="
+          grep "DEBUG:" normalize_filename.sh || echo "No DEBUG in source file!"
+          
           # Create the app using Platypus
           platypus \
             --name "NameMyPdf" \
