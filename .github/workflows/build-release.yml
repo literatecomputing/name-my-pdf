@@ -112,15 +112,13 @@ jobs:
             --app-version "${{ steps.version.outputs.VERSION }}" \
             --interface-type "Droplet" \
             --interpreter "/bin/bash" \
-            --accepts-files \
-            --accepts-text \
             --droppable \
+            --text-droppable \
             --background \
             --quit-after-execution \
-            --text-droppable \
-            --file-types "pdf" \
+            --suffixes "pdf" \
             --uniform-type-identifiers "com.adobe.pdf" \
-            --minimum-version "10.11.0" \
+            --overwrite \
             "normalize_filename.sh" \
             "NameMyPdf.app"
 
