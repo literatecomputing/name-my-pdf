@@ -17,7 +17,7 @@ NameMyPdf is a macOS application that automatically renames academic PDF files u
 1. Download the `.dmg` file from the latest release
 2. Double-click to mount the disk image
 3. Drag `NameMyPdf.app` to the Applications folder
-4. Install dependencies: `brew install poppler jq`
+4. Open the app and then visit system security to allow the app to run
 5. Right-click the app and select "Open" for first launch
 
 #### Option 2: ZIP Archive
@@ -36,9 +36,8 @@ Drag PDF files onto the app icon to rename them automatically!
 - **Universal Binary**: Native support for both Intel and Apple Silicon Macs
 - **Drag & Drop Interface**: Easy-to-use file processing
 - **Automatic DOI Detection**: Scans PDFs for DOI information
-- **CrossRef Integration**: Fetches accurate publication metadata
 - **Batch Processing**: Handle multiple files simultaneously
-- **Clean Filenames**: Standardized `Author Year - Title` format
+- **Clean Filenames**: Standardized `Author Year - Title` format or the format of your choice
 
 ## 🛠 How It Works
 

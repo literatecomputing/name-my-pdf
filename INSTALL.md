@@ -29,39 +29,17 @@
 
 ## System Requirements
 
-- **macOS**: 10.11.0 (El Capitan) or later
+- **macOS**: 10.11.0 (El Capitan) or later (tested only on Sonoma!)
 - **Architecture**: Universal app supporting both Intel and Apple Silicon Macs
-- **Dependencies**: The app requires the following tools to be installed:
-  - `poppler` (for PDF text extraction)
-  - `jq` (for JSON processing)
-  - `curl` (usually pre-installed)
-
-### Install Dependencies
-
-Open Terminal and run:
-
-```bash
-# Install Homebrew if you don't have it
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-# Install required tools
-brew install poppler jq
-```
 
 ## How to Use
 
-### Method 1: Drag and Drop
+### Drag and Drop or "Open With"
 
 1. Locate your PDF files in Finder
 2. Select the PDF files you want to rename
-3. Drag and drop them onto the `NameMyPdf.app` icon
+3. Drag and drop them onto the `NameMyPdf.app` icon or right-click and "Open with" NameMyPdf
 4. The app will process each file and rename it based on the DOI metadata
-
-### Method 2: Using the App Interface
-
-1. Double-click `NameMyPdf.app` to launch it
-2. Use the file selection interface to choose PDF files
-3. The app will process and rename the files automatically
 
 ## What It Does
 
@@ -81,15 +59,32 @@ NameMyPdf automatically renames academic PDF files using:
 3. **Generates Filename**: Creates a clean, standardized filename
 4. **Renames File**: Updates the file with the new name
 
+## Customization
+
+The first time the app runs, it creates a file ~/.namemypdfrc that looks like the one below. You can change the values in that file to customize how files are named.
+
+```
+# This is the configuration file for NameMyPdf. You can change
+# these settings to control how your PDFs are renamed.
+#
+# Hopefully, the settings are clear from their names. . .
+#
+# Optionally let crossref know it's you--recommended if you're naming hundreds of files
+# CROSSREF_EMAIL=you@email.com
+DOWNCASE_TITLE=false
+TITLE_WORDS=7 # number of words from title to include
+TITLE_WORD_SEPARATOR=" "
+AUTHOR_YEAR_SEPARATOR=" "
+YEAR_TITLE_SEPARATOR=" - "
+USE_ABBR_TITLE=false  # use only first letter of title words
+STRIP_TITLE_POST_COLON=true # shorten title to before the colon
+```
+
 ## Troubleshooting
 
 ### "App can't be opened because it is from an unidentified developer"
 
 This is normal for unsigned apps. Follow the security steps in the installation section above.
-
-### "Missing required tools" error
-
-Install the dependencies using Homebrew as described in the System Requirements section.
 
 ### No DOI found
 
@@ -107,7 +102,7 @@ The app requires internet access to query the CrossRef API for metadata.
 
 ## Support
 
-For issues or questions, please visit the project repository or contact the developer.
+For issues or questions, please visit the project repository and open an [issue](https://github.com/literatecomputing/name-my-pdf/issues).
 
 ## License
 
