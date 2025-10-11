@@ -40,8 +40,21 @@ jobs:
 
       - name: Build app with Platypus
         run: |
+          # Find the correct Platypus path (handles both Intel and Apple Silicon)
+          PLATYPUS_PATH=""
+          if [ -f "/opt/homebrew/bin/platypus" ]; then
+            PLATYPUS_PATH="/opt/homebrew/bin/platypus"
+          elif [ -f "/usr/local/bin/platypus" ]; then
+            PLATYPUS_PATH="/usr/local/bin/platypus"
+          else
+            echo "Error: Platypus not found in expected locations"
+            exit 1
+          fi
+          
+          echo "Using Platypus at: $PLATYPUS_PATH"
+          
           # Create the app using Platypus
-          /usr/local/bin/platypus \
+          "$PLATYPUS_PATH" \
             --name "NameMyPdf" \
             --app-icon "icon.icns" \
             --bundle-identifier "com.literatecomputing.namemypdf" \
