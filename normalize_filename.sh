@@ -56,29 +56,53 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 fi
 
-if ! command -v pdftotext &> /dev/null
-then
+# Find tools explicitly - check common Homebrew locations
+find_tool() {
+  local tool=$1
+  # First try command -v (uses PATH)
+  if command -v "$tool" &> /dev/null; then
+    command -v "$tool"
+    return 0
+  fi
+  # Then check Homebrew locations directly
+  if [[ -f "/opt/homebrew/bin/$tool" ]]; then
+    echo "/opt/homebrew/bin/$tool"
+    return 0
+  fi
+  if [[ -f "/usr/local/bin/$tool" ]]; then
+    echo "/usr/local/bin/$tool"
+    return 0
+  fi
+  return 1
+}
+
+# Find and set absolute paths for tools
+PDFTOTEXT=$(find_tool pdftotext)
+JQ=$(find_tool jq)
+CURL=$(find_tool curl)
+
+if [[ -z "$PDFTOTEXT" ]]; then
     echo "pdftotext is missing. Please install poppler-utils or on a mac 'brew install poppler'"
     if [[ "$OSTYPE" == "darwin"* ]]; then
-      echo "ALERT:Configuration|Install poppler in a terminal with 'brew install poppler"
+      echo "ALERT:Configuration|Install poppler in a terminal with 'brew install poppler'"
     fi
-    exit
+    exit 1
 fi
-if ! command -v jq &> /dev/null
-then
+
+if [[ -z "$JQ" ]]; then
     echo "jq is missing. Please install jq or on a mac 'brew install jq'"
     if [[ "$OSTYPE" == "darwin"* ]]; then
-      echo "ALERT:Configuration|Install jq in a terminal with 'brew install jq"
+      echo "ALERT:Configuration|Install jq in a terminal with 'brew install jq'"
     fi
-    exit
+    exit 1
 fi
-if ! command -v curl &> /dev/null
-then
+
+if [[ -z "$CURL" ]]; then
     echo "curl is missing. Please install curl or on a mac 'brew install curl'"
     if [[ "$OSTYPE" == "darwin"* ]]; then
-      echo "ALERT:Configuration|Install curl in a terminal with 'brew install curl"
-      exit
+      echo "ALERT:Configuration|Install curl in a terminal with 'brew install curl'"
     fi
+    exit 1
 fi
 
 
@@ -90,7 +114,7 @@ get_doi_from_pdf_file() {
   # grep: get the line with the DOI (but that's the whole thing?
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
-  DOI=$(pdftotext "$pdf" -l 2  -  2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*' 2> /dev/null|tail -1 )
+  DOI=$("$PDFTOTEXT" "$pdf" -l 2  -  2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*' 2> /dev/null|tail -1 )
   echo $DOI
 }
 
@@ -102,7 +126,7 @@ get_doi_url_from_pdf_file() {
   # grep: get the line with the DOI (but that's the whole thing?
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
-  DOI=$(pdftotext "$pdf" -l 1  -   2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 | awk '{print "https://doi.org/"$1}')
+  DOI=$("$PDFTOTEXT" "$pdf" -l 1  -   2> /dev/null |tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 | awk '{print "https://doi.org/"$1}')
   echo "get_doi_url_from_pdf_file: $DOI"
   echo $DOI
 }
@@ -138,7 +162,7 @@ for item in "$@"; do
     MAILTO="?mailto=$CROSSREF_EMAIL"
   fi
   echo "$item" -- Getting "https://api.crossref.org/works/$DOI$MAILTO"
-  json=$(curl -s "https://api.crossref.org/works/$DOI$MAILTO")
+  json=$("$CURL" -s "https://api.crossref.org/works/$DOI$MAILTO")
   if [[ $DEBUG = "true" ]];then
     echo got json
   fi
@@ -147,7 +171,7 @@ for item in "$@"; do
     continue
   fi
 
-  author=$(echo $json|jq -r '.message.author[0].family')
+  author=$(echo $json|"$JQ" -r '.message.author[0].family')
   if [[ $DEBUG = "true" ]];then
     echo author: $author
   fi
@@ -170,7 +194,7 @@ for item in "$@"; do
     echo author: $author
   fi
 
-  title=$(echo $json|jq -r '.message.title | .[]')
+  title=$(echo $json|"$JQ" -r '.message.title | .[]')
   # Strip HTML tags from title (especially <i> tags for italics)
   title=$(echo "$title" | sed 's/<[^>]*>/ /g')
   # strip non alpha numbers from title
@@ -198,10 +222,10 @@ for item in "$@"; do
   abbr_title=$(echo "$title" | awk -v n="$TITLE_WORDS" '{for(i=1;i<=n && i<=NF;i++) printf "%s", substr($i,1,1)}')
   # make short_journal be the first letter of each word in the journal name
   # journal is currently not used, but here it is if someone wants it
-  journal=$(echo "$json" | jq -r '.message["short-container-title"][0] // .message["container-title"][0]')
+  journal=$(echo "$json" | "$JQ" -r '.message["short-container-title"][0] // .message["container-title"][0]')
   short_j=$(echo $journal|awk '{for(i=1;i<=NF;i++) printf "%s", substr($i,1,1)}')
   # year can be in several places and can be different (e.g., published, vs online)
-  year=$(echo $json|jq -r '
+  year=$(echo $json|"$JQ" -r '
   .message["published-print"]["date-parts"][0][0] //
   .message["journal-issue"]["published-print"]["date-parts"][0][0] //
   .message["published-online"]["date-parts"][0][0] //
