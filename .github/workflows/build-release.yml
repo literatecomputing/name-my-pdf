@@ -89,6 +89,12 @@ jobs:
 
       - name: Build app with Platypus
         run: |
+          # Remove any pre-existing app bundle that might be in the checkout
+          if [ -d "NameMyPdf.app" ]; then
+            echo "Removing pre-existing NameMyPdf.app from checkout"
+            rm -rf NameMyPdf.app
+          fi
+          
           # Debug: Show what we have in the current directory
           echo "=== Files in current directory ==="
           ls -la
