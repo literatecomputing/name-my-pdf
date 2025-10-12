@@ -35,7 +35,7 @@ jobs:
         with:
           source: "docs/_site"
           destination: "/"
-          storageZoneName: "${{ secrets.BUNNY_HOSTNAME }}"
+          storageZoneName: "${{ secrets.BUNNY_ZONE_NAME }}"
           storagePassword: "${{ secrets.BUNNY_PASSWORD }}"
           accessKey: "${{ secrets.BUNNY_ACCESS_KEY }}"
           pullZoneId: "${{ secrets.BUNNY_STORAGE_ZONE }}"
