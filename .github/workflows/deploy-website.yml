@@ -34,22 +34,28 @@ jobs:
         run: |
           cd docs/_site
           
-          # Install rclone for Bunny.net upload
-          curl https://rclone.org/install.sh | sudo bash
+          # Deploy using Bunny.net Storage API
+          # This script uploads all files to the storage zone
           
-          # Configure rclone for Bunny.net
-          mkdir -p ~/.config/rclone
-          cat > ~/.config/rclone/rclone.conf << EOF
-          [bunny]
-          type = webdav
-          url = https://storage.bunnycdn.com/${{ secrets.BUNNY_STORAGE_ZONE }}/
-          vendor = other
-          user = ${{ secrets.BUNNY_STORAGE_ZONE }}
-          pass = $(rclone obscure "${{ secrets.BUNNY_ACCESS_KEY }}")
-          EOF
+          upload_file() {
+            local file="$1"
+            local remote_path="$2"
+            
+            echo "Uploading: $remote_path"
+            curl -X PUT \
+              "https://storage.bunnycdn.com/${{ secrets.BUNNY_STORAGE_ZONE }}/$remote_path" \
+              -H "AccessKey: ${{ secrets.BUNNY_ACCESS_KEY }}" \
+              -H "Content-Type: application/octet-stream" \
+              --data-binary "@$file" \
+              --fail --silent --show-error
+          }
           
-          # Sync files to Bunny.net
-          rclone sync . bunny: --progress --transfers 10 --checkers 20
+          # Upload all files recursively
+          find . -type f | while read file; do
+            # Remove leading ./
+            remote_path="${file#./}"
+            upload_file "$file" "$remote_path"
+          done
           
           echo "✅ Website deployed successfully to Bunny.net!"
 
