@@ -4,13 +4,13 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
+      - "docs/**"
   workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: "3.2"
           bundler-cache: true
           working-directory: docs
 
@@ -31,33 +31,14 @@ jobs:
           JEKYLL_ENV: production
 
       - name: Deploy to Bunny.net Storage
-        run: |
-          cd docs/_site
-          
-          # Deploy using Bunny.net Storage API
-          # This script uploads all files to the storage zone
-          
-          upload_file() {
-            local file="$1"
-            local remote_path="$2"
-            
-            echo "Uploading: $remote_path"
-            curl -X PUT \
-              "https://storage.bunnycdn.com/${{ secrets.BUNNY_STORAGE_ZONE }}/$remote_path" \
-              -H "AccessKey: ${{ secrets.BUNNY_ACCESS_KEY }}" \
-              -H "Content-Type: application/octet-stream" \
-              --data-binary "@$file" \
-              --fail --silent --show-error
-          }
-          
-          # Upload all files recursively
-          find . -type f | while read file; do
-            # Remove leading ./
-            remote_path="${file#./}"
-            upload_file "$file" "$remote_path"
-          done
-          
-          echo "✅ Website deployed successfully to Bunny.net!"
+        uses: ayeressian/bunnycdn-storage-deploy@v2.2.2
+        with:
+          source: "docs/_site"
+          destination: "/"
+          storageZoneName: "${{ secrets.BUNNY_STORAGE_ZONE }}"
+          accessKey: "${{ secrets.BUNNY_ACCESS_KEY }}"
+          storageEndpoint: "ny.storage.bunnycdn.com" # Change to region-specific if needed (ny.storage.bunnycdn.com, etc.)
+          remove: "true"
 
       - name: Purge Bunny CDN Cache (optional)
         if: success()
