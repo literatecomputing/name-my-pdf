@@ -31,6 +31,24 @@ NameMyPdf is a macOS application that automatically renames academic PDF files u
 
 Drag PDF files onto the app icon to rename them automatically!
 
+### Command-Line Usage (Optional)
+
+After installing the app, you can also use it from the command line:
+
+```bash
+# Install the command-line tool (one-time setup)
+cd /Applications/NameMyPdf.app/Contents/Resources
+curl -O https://raw.githubusercontent.com/literatecomputing/name-my-pdf/main/install-cli.sh
+chmod +x install-cli.sh
+./install-cli.sh
+
+# Use from anywhere
+namemypdf file1.pdf file2.pdf
+namemypdf *.pdf
+```
+
+This creates a `namemypdf` command that calls the bundled script directly.
+
 ## ✨ Features
 
 - **Universal Binary**: Native support for both Intel and Apple Silicon Macs
