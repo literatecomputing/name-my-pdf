@@ -1,0 +1,62 @@
+name: Deploy Website to Bunny.net
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+          bundler-cache: true
+          working-directory: docs
+
+      - name: Build Jekyll site
+        run: |
+          cd docs
+          bundle install
+          bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+
+      - name: Deploy to Bunny.net Storage
+        run: |
+          cd docs/_site
+          
+          # Install rclone for Bunny.net upload
+          curl https://rclone.org/install.sh | sudo bash
+          
+          # Configure rclone for Bunny.net
+          mkdir -p ~/.config/rclone
+          cat > ~/.config/rclone/rclone.conf << EOF
+          [bunny]
+          type = webdav
+          url = https://storage.bunnycdn.com/${{ secrets.BUNNY_STORAGE_ZONE }}/
+          vendor = other
+          user = ${{ secrets.BUNNY_STORAGE_ZONE }}
+          pass = $(rclone obscure "${{ secrets.BUNNY_ACCESS_KEY }}")
+          EOF
+          
+          # Sync files to Bunny.net
+          rclone sync . bunny: --progress --transfers 10 --checkers 20
+          
+          echo "✅ Website deployed successfully to Bunny.net!"
+
+      - name: Purge Bunny CDN Cache (optional)
+        if: success()
+        run: |
+          # Purge the CDN cache to ensure latest content is served
+          curl -X POST "https://api.bunny.net/pullzone/${{ secrets.BUNNY_PULLZONE_ID }}/purgeCache" \
+            -H "AccessKey: ${{ secrets.BUNNY_ACCESS_KEY }}" \
+            || echo "Cache purge failed or not configured (optional)"
