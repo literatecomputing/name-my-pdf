@@ -35,8 +35,10 @@ jobs:
         with:
           source: "docs/_site"
           destination: "/"
-          storageZoneName: "${{ secrets.BUNNY_STORAGE_ZONE }}"
+          storageZoneName: "${{ secrets.BUNNY_HOSTNAME }}"
+          storagePassword: "${{ secrets.BUNNY_PASSWORD }}"
           accessKey: "${{ secrets.BUNNY_ACCESS_KEY }}"
+          pullZoneId: "${{ secrets.BUNNY_STORAGE_ZONE }}"
           storageEndpoint: "ny.storage.bunnycdn.com" # Change to region-specific if needed (ny.storage.bunnycdn.com, etc.)
           remove: "true"
 
