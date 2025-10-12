@@ -173,6 +173,7 @@ jobs:
             --uniform-type-identifiers "com.adobe.pdf" \
             --bundled-file "bundled-bin/jq" \
             --bundled-file "bundled-bin/pdftotext" \
+            --bundled-file "install-cli.sh" \
             --overwrite \
             "normalize_filename.sh" \
             "NameMyPdf.app"
