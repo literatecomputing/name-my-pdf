@@ -213,10 +213,10 @@ jobs:
           NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
         run: |
           # Store notarization credentials for this build
-          echo "$NOTARIZATION_PASSWORD" | xcrun notarytool store-credentials "github-actions" \
+          xcrun notarytool store-credentials "github-actions" \
             --apple-id "$APPLE_ID" \
             --team-id "$TEAM_ID" \
-            --password
+            --password "$NOTARIZATION_PASSWORD"
 
       - name: Sign and Notarize
         if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.sign == 'true')
