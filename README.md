@@ -92,6 +92,26 @@ The workflow will:
 
 You can also trigger builds manually from the GitHub Actions tab, or build locally using Platypus.
 
+## 🧪 Testing
+
+The project includes automated tests for PDF renaming functionality:
+
+```bash
+# Run tests
+cd test-pdfs
+./test_rename.sh
+```
+
+Tests validate:
+- ✅ Successful PDF renaming with complete metadata
+- ✅ Multi-author papers (first author extraction)
+- ✅ Error handling for incomplete CrossRef data
+- ✅ Expected failure cases (missing author fields)
+
+Tests run automatically on every push and pull request via GitHub Actions on both Ubuntu and macOS.
+
+See [test-pdfs/README.md](./test-pdfs/README.md) for details.
+
 ### API Usage
 
 Per CrossRef documentation, we include a User-Agent header and recommend adding an email for API identification:
