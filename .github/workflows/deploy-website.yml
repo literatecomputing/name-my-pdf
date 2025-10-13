@@ -38,7 +38,7 @@ jobs:
           storageZoneName: "${{ secrets.BUNNY_ZONE_NAME }}"
           storagePassword: "${{ secrets.BUNNY_PASSWORD }}"
           accessKey: "${{ secrets.BUNNY_ACCESS_KEY }}"
-          pullZoneId: "${{ secrets.BUNNY_STORAGE_ZONE }}"
+          pullZoneId: "${{ secrets.BUNNY_PULL_ZONE_ID }}"
           storageEndpoint: "ny.storage.bunnycdn.com" # Change to region-specific if needed (ny.storage.bunnycdn.com, etc.)
           # remove: "true"
           upload: "true"
