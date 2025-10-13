@@ -43,7 +43,6 @@ jobs:
           # remove: "true"
           upload: "true"
           purgePullZone: "true"
-          purgePullZoneDelay: "5"
           maxRetries: "5"
 
       - name: Purge Bunny CDN Cache (optional)
