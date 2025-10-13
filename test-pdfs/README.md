@@ -6,26 +6,28 @@ This directory contains test PDF files used to validate the PDF renaming functio
 
 ### ✅ Success Cases
 
-| File | DOI | Author | Year | Expected Behavior |
-|------|-----|--------|------|-------------------|
-| **b.pdf** | `10.1016/j.chb.2010.04.008` | Baytiyeh & Pfaffman | 2010 | Renames to: `Baytiyeh 2010 - Open source software.pdf` |
-| **s.pdf** | `10.1207/s15327647jcd0601_5` | Schwartz, Martin, & Pfaffman | 2005 | Renames to: `Schwartz 2005 - How Mathematics Propels the Development of Physical.pdf` |
-| **p2.pdf** | `10.1353/hsj.2008.0006` | Pfaffman | 2008 | Renames to: `Pfaffman 2008 - Transforming High School Classrooms with FreeOpen Source.pdf` |
+| File       | DOI                          | Author                       | Year | Expected Behavior                                                                          |
+| ---------- | ---------------------------- | ---------------------------- | ---- | ------------------------------------------------------------------------------------------ |
+| **b.pdf**  | `10.1016/j.chb.2010.04.008`  | Baytiyeh & Pfaffman          | 2010 | Renames to: `Baytiyeh 2010 - Open source software.pdf`                                     |
+| **s.pdf**  | `10.1207/s15327647jcd0601_5` | Schwartz, Martin, & Pfaffman | 2005 | Renames to: `Schwartz 2005 - How Mathematics Propels the Development of Physical.pdf`      |
+| **p2.pdf** | `10.1353/hsj.2008.0006`      | Pfaffman                     | 2008 | Renames to: `Pfaffman 2008 - Transforming High School Classrooms with FreeOpen Source.pdf` |
 
 ### ❌ Expected Failure Cases
 
-| File | DOI | Issue | Expected Behavior |
-|------|-----|-------|-------------------|
+| File      | DOI                         | Issue                               | Expected Behavior                                       |
+| --------- | --------------------------- | ----------------------------------- | ------------------------------------------------------- |
 | **p.pdf** | `10.1007/s11528-007-0040-x` | Missing author in CrossRef metadata | Prints error: "Failed to extract author" and skips file |
 
 ## Running Tests
 
 ### Quick Test
+
 ```bash
 ./test_rename.sh
 ```
 
 This will:
+
 1. Create a temporary directory
 2. Copy all test PDFs
 3. Run `normalize_filename.sh` on each PDF
@@ -33,6 +35,7 @@ This will:
 5. Clean up temporary files
 
 ### Expected Output
+
 ```
 ╔════════════════════════════════════════════════════════╗
 ║        NameMyPdf Test Suite - PDF Renaming Tests      ║

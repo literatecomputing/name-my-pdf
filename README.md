@@ -103,6 +103,7 @@ cd test-pdfs
 ```
 
 Tests validate:
+
 - ✅ Successful PDF renaming with complete metadata
 - ✅ Multi-author papers (first author extraction)
 - ✅ Error handling for incomplete CrossRef data
