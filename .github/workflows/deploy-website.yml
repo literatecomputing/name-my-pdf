@@ -40,7 +40,7 @@ jobs:
           accessKey: "${{ secrets.BUNNY_ACCESS_KEY }}"
           pullZoneId: "${{ secrets.BUNNY_STORAGE_ZONE }}"
           storageEndpoint: "ny.storage.bunnycdn.com" # Change to region-specific if needed (ny.storage.bunnycdn.com, etc.)
-          remove: "true"
+          # remove: "true"
           upload: "true"
           purgePullZone: "true"
           purgePullZoneDelay: "5"
