@@ -52,7 +52,9 @@ fi
 
 # Function to log messages
 debug_message() {
-  echo "$(date '+%Y-%m-%d %H:%M:%S') - $*" >> "$DEBUGFILE"
+  if [[ "$DEBUG" == "true" ]]; then
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $*" >> "$DEBUGFILE"
+  fi
 }
 log_message() {
   echo "$(date '+%Y-%m-%d %H:%M:%S') - $*" >> "$LOGFILE"
@@ -215,8 +217,10 @@ for item in "$@"; do
   
   DOI=$(get_doi_from_pdf_file "$ITEM_ABS_PATH")
   if [[ -z $DOI ]];then
+    DEBUG=true
     debug_message "No DOI found in: $item"
     echo "No DOI found in $item, skipping"
+    DEBUG=false
     continue
   fi
   
@@ -233,8 +237,10 @@ for item in "$@"; do
     debug_message "$item" -- retrieved "https://api.crossref.org/works/$DOI$MAILTO"
   fi
   if echo "$json" | grep -q "Resource not found."; then
+    DEBUG=true
     debug_message "DOI not found in CrossRef: $DOI"
     echo "$item: $DOI --- not found"
+    DEBUG=false
     continue
   fi
 
@@ -243,7 +249,10 @@ for item in "$@"; do
     echo author: $author
   fi
   if [ -z "$author" ] || [ "$author" = "null" ]; then
-    echo "Failed to extract author. Skipping $item"
+    DEBUG=true
+    echo "$item: Failed to extract author from https://api.crossref.org/works/$DOI$MAILTO "
+    debug_message "$item: Failed to extract author from https://api.crossref.org/works/$DOI$MAILTO "
+    DEBUG=false
     continue
   fi
   # Capitalize author name properly
