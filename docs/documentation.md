@@ -7,6 +7,7 @@ has_children: true
 ---
 
 # Documentation
+
 {: .no_toc }
 
 Complete guide to using NameMyPdf.
@@ -15,22 +16,23 @@ Complete guide to using NameMyPdf.
 ---
 
 ## Table of Contents
+
 {: .no_toc .text-delta }
 
 1. TOC
-{:toc}
+   {:toc}
 
 ---
 
 ## Basic Usage
 
-### Drag and Drop
+### Open With
 
 The simplest way to use NameMyPdf:
 
-1. Open your **Applications** folder
-2. Locate PDF files you want to rename
-3. **Drag and drop** them onto the NameMyPdf.app icon
+1. Open the Finder
+2. Locate and select PDF files you want to rename
+3. **Right Click** and choose **Open With** and select **NameMyPdf**
 4. Watch as they're automatically renamed!
 
 A progress window will show you what's happening. The app will quit automatically when done.
@@ -45,12 +47,12 @@ NameMyPdf follows this process for each PDF:
 graph LR
     A[PDF File] --> B[Extract DOI]
     B --> C[Query CrossRef API]
-    C --> D[Get Metadata]
+    C --> D[Get Metadata (author, year, title, journal, etc)]
     D --> E[Generate Filename]
     E --> F[Rename File]
 ```
 
-1. **Scans** the first 2 pages of the PDF for DOI information
+1. **Scans** the first 2 pages of the PDF for a DOI (very old PDFs may not have this)
 2. **Extracts** the DOI using pattern matching
 3. **Queries** the CrossRef API for metadata (author, year, title)
 4. **Generates** a clean filename: `Author Year - Title.pdf`
@@ -68,11 +70,11 @@ Author Year - Title.pdf
 
 **Examples:**
 
-| Original | Renamed |
-|:---------|:--------|
-| `paper.pdf` | `Smith 2023 - Machine Learning Applications.pdf` |
-| `download.pdf` | `Johnson 2024 - Neural Networks Deep Learning.pdf` |
-| `arxiv-1234.pdf` | `Chen 2023 - Computer Vision Transformers.pdf` |
+| Original         | Renamed                                            |
+| :--------------- | :------------------------------------------------- |
+| `paper.pdf`      | `Smith 2023 - Machine Learning Applications.pdf`   |
+| `download.pdf`   | `Johnson 2024 - Neural Networks Deep Learning.pdf` |
+| `arxiv-1234.pdf` | `Chen 2023 - Computer Vision Transformers.pdf`     |
 
 ---
 
@@ -82,7 +84,7 @@ NameMyPdf creates a configuration file at `~/.namemypdfrc` on first run.
 
 ### Configuration Options
 
-Edit `~/.namemypdfrc` to customize:
+Edit `~/.namemypdfrc` to customize -- use Command-Shift-. (period) to show hidden files:
 
 ```bash
 # Email for CrossRef API (recommended for heavy usage)
@@ -116,22 +118,30 @@ DEBUG=false
 ### Example Configurations
 
 **Shorter filenames:**
+
 ```bash
 TITLE_WORDS=4
 STRIP_TITLE_POST_COLON=true
 ```
+
 Result: `Smith 2023 - Machine Learning Applications.pdf`
 
 **Abbreviated titles:**
+
 ```bash
 USE_ABBR_TITLE=true
+TITLE_WORD_SEPARATOR=""
+AUTHOR_YEAR_SEPARATOR=""
 ```
-Result: `Smith 2023 - MLA.pdf`
+
+Result: `Smith2023MLA.pdf`
 
 **All lowercase:**
+
 ```bash
 DOWNCASE_TITLE=true
 ```
+
 Result: `smith 2023 - machine learning applications.pdf`
 
 ---
@@ -197,6 +207,7 @@ DEBUG=true
 ```
 
 This will show detailed information about:
+
 - Tool paths (pdftotext, jq, curl)
 - DOI extraction
 - API responses
@@ -211,6 +222,7 @@ This will show detailed information about:
 **Problem:** "No DOI found in [filename], skipping"
 
 **Solutions:**
+
 - Make sure the PDF actually contains DOI information
 - DOI should be on the first 2 pages
 - Some old papers don't have DOIs embedded in the PDF
@@ -221,15 +233,10 @@ This will show detailed information about:
 **Problem:** "[DOI] --- not found"
 
 **Solutions:**
+
 - The DOI exists in the PDF but isn't in CrossRef database
 - Try manually looking up the DOI at https://doi.org/
 - The DOI might be malformed or incorrect
-
-### Illegal Byte Sequence
-
-**Problem:** Terminal errors about illegal byte sequences
-
-**Solution:** This should be fixed in v0.9.19+. Update to the latest version.
 
 ### File Not Renamed
 

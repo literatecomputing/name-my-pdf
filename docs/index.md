@@ -7,6 +7,7 @@ permalink: /
 ---
 
 # NameMyPdf
+
 {: .fs-9 }
 
 Automatically rename academic PDF files using metadata from their DOI.
@@ -19,17 +20,13 @@ Automatically rename academic PDF files using metadata from their DOI.
 
 ## ✨ Features
 
-**Zero Dependencies**
-{: .label .label-green }
-All required tools are bundled - no Homebrew or other installations needed!
-
 **Universal Binary**
 {: .label .label-blue }
 Native support for both Intel and Apple Silicon Macs
 
-**Drag & Drop**
+**Drag & Drop or Open-With **
 {: .label .label-purple }
-Simple interface - just drag PDF files onto the app icon
+Simple interface - just drag PDF files onto the app icon or select and choose "open-with"
 
 **Command Line**
 {: .label .label-yellow }
@@ -41,9 +38,9 @@ Optional CLI tool for terminal users
 
 1. **Download** the latest `.dmg` file from [releases](https://github.com/literatecomputing/name-my-pdf/releases/latest)
 2. **Install** by dragging NameMyPdf.app to your Applications folder
-3. **Use** by dropping PDF files onto the app icon
-
-That's it! No dependencies to install. 🎉
+3. **Allow Access** App is not signed by Apple so you have to start it and "Open Anyway" from System "Security" (scroll to bottom) See [Download Page](/download.html) for details
+4. **Edit the Configuration** The first time, you'll be presented with the configuration file in TextEdit. You can adjust the filename to your liking.
+5. **Use** select files in the Finder and choose "open with ... NameMyPdf"
 
 ---
 
@@ -52,12 +49,14 @@ That's it! No dependencies to install. 🎉
 NameMyPdf scans your PDF files for DOI (Digital Object Identifier) information, queries the CrossRef API for metadata, and renames your files in a clean, standardized format.
 
 **Before:**
+
 ```
 downloaded-paper.pdf
 arxiv-1234.5678v2.pdf
 ```
 
 **After:**
+
 ```
 Smith 2023 - Machine Learning Applications.pdf
 Johnson 2024 - Neural Network Architecture.pdf

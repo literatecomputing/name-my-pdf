@@ -6,6 +6,7 @@ description: "Download NameMyPdf for macOS"
 ---
 
 # Download NameMyPdf
+
 {: .no_toc }
 
 Get the latest version of NameMyPdf for macOS.
@@ -19,6 +20,7 @@ Get the latest version of NameMyPdf for macOS.
 **Current Version:** Check [releases page](https://github.com/literatecomputing/name-my-pdf/releases/latest) for the latest version
 
 **Last Updated:** See [releases](https://github.com/literatecomputing/name-my-pdf/releases/latest)
+
 </div>
 
 [Download DMG (Recommended)](https://github.com/literatecomputing/name-my-pdf/releases/latest/download/NameMyPdf-latest.dmg){: .btn .btn-primary .btn-purple }
@@ -41,6 +43,7 @@ Get the latest version of NameMyPdf for macOS.
    - Click **"Open"** in the security dialog
 
 {: .note }
+
 > The right-click → Open step is required the first time because the app is not code-signed. After the first launch, you can open it normally.
 
 ### ZIP Installation
@@ -57,18 +60,18 @@ Get the latest version of NameMyPdf for macOS.
 ✅ **Universal Binary** - Runs natively on both Intel and Apple Silicon Macs  
 ✅ **Bundled Tools** - Includes jq and pdftotext (no Homebrew needed)  
 ✅ **GUI App** - Drag-and-drop interface  
-✅ **CLI Installer** - Optional command-line tool (see [Documentation]({{ site.baseurl }}{% link documentation.md %}))  
+✅ **CLI Installer** - Optional command-line tool (see [Documentation]({{ site.baseurl }}{% link documentation.md %}))
 
 ---
 
 ## System Requirements
 
-| Requirement | Details |
-|:------------|:--------|
-| **OS** | macOS 10.11 (El Capitan) or later |
-| **Architecture** | Intel or Apple Silicon |
-| **Internet** | Required for DOI metadata lookup |
-| **Dependencies** | None - everything is bundled! |
+| Requirement      | Details                           |
+| :--------------- | :-------------------------------- |
+| **OS**           | macOS 10.11 (El Capitan) or later |
+| **Architecture** | Intel or Apple Silicon            |
+| **Internet**     | Required for DOI metadata lookup  |
+| **Dependencies** | None - everything is bundled!     |
 
 ---
 

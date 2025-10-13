@@ -21,7 +21,7 @@
    - Click "**Open Anyway**" next to the NameMyPdf message
    - Or right-click the app and select "**Open**" from the context menu
 
-#### Option B: ZIP Installation
+#### Option B: ZIP Installation (Advanced)
 
 1. **Unzip the file**: Double-click the downloaded `.zip` file to extract it
 2. **Move to Applications**: Drag `NameMyPdf.app` to your `/Applications` folder (optional but recommended)
