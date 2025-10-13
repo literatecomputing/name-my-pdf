@@ -32,11 +32,37 @@ AUTHOR_YEAR_SEPARATOR=" "
 YEAR_TITLE_SEPARATOR=" - "
 USE_ABBR_TITLE=false  # use only first letter of title words
 STRIP_TITLE_POST_COLON=true # shorten title to before the colon
-DEBUG=false
+DEBUG=false # log info for debugging issues
+LOG=true # log files renamed 
 EOF
   open -e ~/.namemypdfrc
 fi
 source ~/.namemypdfrc
+
+# Set up logging
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  LOGFILE="$HOME/Library/Logs/NameMyPdf.log"
+  DEBUGFILE="$HOME/Library/Logs/NameMyPdf-debug.log"
+  mkdir -p "$(dirname "$LOGFILE")"
+  mkdir -p "$(dirname "$DEBUGFILE")"
+else 
+  LOGFILE="$HOME/.namemypdf.log"
+  DEBUGFILE="$HOME/.namemypdf-debug.log"
+fi
+
+# Function to log messages
+debug_message() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $*" >> "$DEBUGFILE"
+}
+log_message() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $*" >> "$LOGFILE"
+}
+
+# Log session start
+debug_message "==================== Session Start ===================="
+debug_message "Arguments: $@"
+debug_message "Working directory: $(pwd)"
+debug_message "DEBUG mode: $DEBUG"
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
   got_brew=false
@@ -92,13 +118,19 @@ PDFTOTEXT=$(find_tool pdftotext)
 JQ=$(find_tool jq)
 CURL=$(find_tool curl)
 
-# Debug: Show what we found
-echo "DEBUG: PDFTOTEXT=$PDFTOTEXT"
-echo "DEBUG: JQ=$JQ"
-echo "DEBUG: CURL=$CURL"
-echo "DEBUG: PATH=$PATH"
+# Log tool paths
+debug_message "Tool paths: PDFTOTEXT=$PDFTOTEXT, JQ=$JQ, CURL=$CURL"
+
+# Debug: Show what we found (only if DEBUG is enabled)
+if [[ "$DEBUG" == "true" ]]; then
+  echo "DEBUG: PDFTOTEXT=$PDFTOTEXT"
+  echo "DEBUG: JQ=$JQ"
+  echo "DEBUG: CURL=$CURL"
+  echo "DEBUG: PATH=$PATH"
+fi
 
 if [[ -z "$PDFTOTEXT" ]]; then
+    debug_message "ERROR: pdftotext not found"
     echo "pdftotext is missing. Please install poppler-utils or on a mac 'brew install poppler'"
     if [[ "$OSTYPE" == "darwin"* ]]; then
       echo "ALERT:Configuration|Install poppler in a terminal with 'brew install poppler'"
@@ -132,6 +164,9 @@ get_doi_from_pdf_file() {
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
   DOI=$("$PDFTOTEXT" -l 2  "$pdf" -  2> /dev/null | iconv -c -f utf-8 -t utf-8 2> /dev/null | tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*' 2> /dev/null|tail -1 )
+  if [[ $DEBUG = "true" ]];then
+    debug_message "get_doi_from_pdf_file: $DOI"
+  fi
   echo $DOI
 }
 
@@ -145,8 +180,10 @@ get_doi_url_from_pdf_file() {
   # awk: split the line at DOI:, leaving the DOI and the rest of the line
   # awk: get just the first word (the DOI)
   DOI=$("$PDFTOTEXT"  -l 2 "$pdf" -   2> /dev/null | iconv -c -f utf-8 -t utf-8 2> /dev/null | tr '\n' ' ' | sed 's|/ |/|' | grep -Eo '10\.[0-9]{4,9}/[a-zA-Z0-9/:._-]*'|tail -1 | awk '{print "https://doi.org/"$1}')
-  echo "get_doi_url_from_pdf_file: $DOI"
-  echo $DOI
+  if [[ $DEBUG = "true" ]];then
+    debug_message "get_doi_url_from_pdf_file: $DOI"
+    echo $DOI
+  fi
 }
 
 capitalize_author_name() {
@@ -156,9 +193,15 @@ capitalize_author_name() {
   # Preserve mixed case names like "deCosta", "van der Berg", etc.
   if [[ "$name" =~ ^[A-Z]+$ ]] || [[ "$name" =~ ^[a-z]+$ ]]; then
     # Convert to title case: first letter uppercase, rest lowercase
+    if [[ $DEBUG = "true" ]];then
+      debug_message "capitalize_author_name: $name -> ${name:0:1}$(echo "${name:1}" | tr '[:upper:]' '[:lower:]')"
+    fi
     echo "${name:0:1}$(echo "${name:1}" | tr '[:upper:]' '[:lower:]')"
   else
     # Name has mixed case, preserve it
+    if [[ $DEBUG = "true" ]];then
+      debug_message "capitalize_author_name: $name (preserved)"
+    fi 
     echo "$name"
   fi
 }
@@ -168,23 +211,29 @@ for item in "$@"; do
   ITEM_ABS_PATH=$(realpath "$item")
   ITEM_DIR=$(dirname "$ITEM_ABS_PATH")
 
+  debug_message "Processing: $item"
+  
   DOI=$(get_doi_from_pdf_file "$ITEM_ABS_PATH")
   if [[ -z $DOI ]];then
+    debug_message "No DOI found in: $item"
     echo "No DOI found in $item, skipping"
     continue
   fi
+  
+  debug_message "Found DOI: $DOI"
+  
   FILE_DOI=$(echo $DOI|sed 's|/|_|g')
   if [[ -z "$CROSSREF_EMAIL" ]];then
     MAILTO=""
   else
     MAILTO="?mailto=$CROSSREF_EMAIL"
   fi
-  echo "$item" -- Getting "https://api.crossref.org/works/$DOI$MAILTO"
-  json=$("$CURL" -s "https://api.crossref.org/works/$DOI$MAILTO")
+    json=$("$CURL" -s "https://api.crossref.org/works/$DOI$MAILTO")
   if [[ $DEBUG = "true" ]];then
-    echo got json
+    debug_message "$item" -- retrieved "https://api.crossref.org/works/$DOI$MAILTO"
   fi
   if echo "$json" | grep -q "Resource not found."; then
+    debug_message "DOI not found in CrossRef: $DOI"
     echo "$item: $DOI --- not found"
     continue
   fi
@@ -261,6 +310,7 @@ for item in "$@"; do
   target_filename="$author$AUTHOR_YEAR_SEPARATOR$year$YEAR_TITLE_SEPARATOR$target_title"
   target_path="$ITEM_DIR/$target_filename.pdf"
 
+  debug_message "Generated filename: $target_filename.pdf"
 
   if [[ $DEBUG = "true" ]];then
     echo filename: $target_filename
@@ -268,9 +318,14 @@ for item in "$@"; do
 
   # Check if target file already exists
   if [[ -f "$target_path" ]]; then
+    debug_message "Target file already exists: $target_path"
     echo "Target file already exists: $target_path"
   else
-    echo "Renaming: $item -> $target_filename"
+    debug_message "Renaming: $item -> $target_filename.pdf"
+    echo "Renaming: $item -> $target_filename.pdf"
+    log_message "$item -> $target_filename.pdf"
     mv "$ITEM_ABS_PATH" "$target_path"
   fi
 done
+
+debug_message "==================== Session End ===================="
