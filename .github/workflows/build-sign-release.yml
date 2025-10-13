@@ -1,0 +1,394 @@
+name: Build, Sign and Release NameMyPdf
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number (e.g., 1.0.1)"
+        required: true
+        default: "0.9.0"
+      sign:
+        description: "Sign and notarize the app"
+        required: true
+        type: boolean
+        default: true
+
+env:
+  DEVELOPER_ID_APPLICATION: "Developer ID Application: Jay Pfaffman (B9YN7Q93P9)"
+  APPLE_ID: "jay@literatecomputing.com"
+  TEAM_ID: "B9YN7Q93P9"
+  BUNDLE_ID: "com.literatecomputing.namemypdf"
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Install dependencies
+        run: |
+          # Install Platypus for app building
+          brew install --cask platypus
+
+          # List what's actually in the Platypus app bundle
+          echo "Contents of Platypus Resources:"
+          ls -la /Applications/Platypus.app/Contents/Resources/
+
+          # Set up Platypus command-line tool
+          sudo mkdir -p /usr/local/bin
+          sudo mkdir -p /usr/local/share/platypus
+
+          # Check if platypus_clt exists (may be gzipped or have different name)
+          if [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt ]; then
+            sudo cp /Applications/Platypus.app/Contents/Resources/platypus_clt /usr/local/bin/platypus
+          elif [ -f /Applications/Platypus.app/Contents/Resources/platypus_clt.gz ]; then
+            sudo gunzip -c /Applications/Platypus.app/Contents/Resources/platypus_clt.gz > /tmp/platypus
+            sudo mv /tmp/platypus /usr/local/bin/platypus
+          else
+            # Try to find platypus command line tool with any name
+            PLATYPUS_CLI=$(find /Applications/Platypus.app/Contents/Resources -name "*platypus*" -type f | grep -v ".nib" | head -1)
+            if [ -n "$PLATYPUS_CLI" ]; then
+              echo "Found Platypus CLI at: $PLATYPUS_CLI"
+              sudo cp "$PLATYPUS_CLI" /usr/local/bin/platypus
+            else
+              echo "Error: Could not find Platypus CLI tool"
+              exit 1
+            fi
+          fi
+
+          # Copy ScriptExec
+          if [ -f /Applications/Platypus.app/Contents/Resources/ScriptExec ]; then
+            sudo cp /Applications/Platypus.app/Contents/Resources/ScriptExec /usr/local/share/platypus/
+          elif [ -f /Applications/Platypus.app/Contents/Resources/ScriptExec.gz ]; then
+            sudo gunzip -c /Applications/Platypus.app/Contents/Resources/ScriptExec.gz > /tmp/ScriptExec
+            sudo mv /tmp/ScriptExec /usr/local/share/platypus/ScriptExec
+          fi
+
+          # Copy nib files
+          if [ -d /Applications/Platypus.app/Contents/Resources/MainMenu.nib ]; then
+            sudo cp -R /Applications/Platypus.app/Contents/Resources/MainMenu.nib /usr/local/share/platypus/
+          fi
+
+          # Make executables
+          sudo chmod +x /usr/local/bin/platypus
+          if [ -f /usr/local/share/platypus/ScriptExec ]; then
+            sudo chmod +x /usr/local/share/platypus/ScriptExec
+          fi
+
+          # Verify installation
+          which platypus
+          platypus -v
+
+          # Install create-dmg for DMG creation
+          brew install create-dmg
+
+      - name: Download and prepare bundled binaries
+        run: |
+          mkdir -p bundled-bin
+          cd bundled-bin
+
+          # Download jq binaries for both architectures
+          echo "Downloading jq binaries..."
+          curl -L -o jq-macos-amd64 https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-amd64
+          curl -L -o jq-macos-arm64 https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-arm64
+
+          # Make them executable
+          chmod +x jq-macos-amd64 jq-macos-arm64
+
+          # Create universal binary for jq
+          echo "Creating universal jq binary..."
+          lipo -create jq-macos-amd64 jq-macos-arm64 -output jq
+          chmod +x jq
+
+          # Verify jq
+          file jq
+          ./jq --version
+
+          # Download Xpdf tools (contains pdftotext for both architectures)
+          echo "Downloading Xpdf tools..."
+          curl -L -o xpdf-tools-mac-4.05.tar.gz https://dl.xpdfreader.com/xpdf-tools-mac-4.05.tar.gz
+          tar -xzf xpdf-tools-mac-4.05.tar.gz
+
+          # Extract pdftotext binaries for both architectures
+          echo "Extracting pdftotext binaries..."
+          cp xpdf-tools-mac-4.05/bin64/pdftotext pdftotext-x86_64
+          cp xpdf-tools-mac-4.05/binARM/pdftotext pdftotext-arm64
+
+          # Make them executable
+          chmod +x pdftotext-x86_64 pdftotext-arm64
+
+          # Create universal binary for pdftotext
+          echo "Creating universal pdftotext binary..."
+          lipo -create pdftotext-x86_64 pdftotext-arm64 -output pdftotext
+          chmod +x pdftotext
+
+          # Verify pdftotext
+          file pdftotext
+          ./pdftotext -v || true  # pdftotext returns non-zero exit code when showing version
+
+          # Clean up source files
+          rm -f jq-macos-amd64 jq-macos-arm64 pdftotext-x86_64 pdftotext-arm64
+          rm -rf xpdf-tools-mac-4.05 xpdf-tools-mac-4.05.tar.gz
+
+          # List final binaries
+          echo "Final bundled binaries:"
+          ls -lah
+
+          cd ..
+
+      - name: Build app with Platypus
+        run: |
+          # Remove any pre-existing app bundle that might be in the checkout
+          if [ -d "NameMyPdf.app" ]; then
+            echo "Removing pre-existing NameMyPdf.app from checkout"
+            rm -rf NameMyPdf.app
+          fi
+
+          # Ensure dist directory exists
+          mkdir -p dist
+
+          # Create the app using Platypus
+          platypus \
+            --name "NameMyPdf" \
+            --app-icon "icon.icns" \
+            --bundle-identifier "$BUNDLE_ID" \
+            --author "Jay Pfaffman" \
+            --app-version "${{ steps.version.outputs.VERSION }}" \
+            --interface-type "Droplet" \
+            --interpreter "/bin/bash" \
+            --droppable \
+            --text-droppable \
+            --quit-after-execution \
+            --suffixes "pdf" \
+            --uniform-type-identifiers "com.adobe.pdf" \
+            --bundled-file "bundled-bin/jq" \
+            --bundled-file "bundled-bin/pdftotext" \
+            --bundled-file "install-cli.sh" \
+            --overwrite \
+            "normalize_filename.sh" \
+            "dist/NameMyPdf.app"
+
+      - name: Import Code Signing Certificate
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.sign == 'true')
+        env:
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          CERTIFICATE_BASE64: ${{ secrets.CERTIFICATE_BASE64 }}
+        run: |
+          # Create temporary keychain
+          KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
+          KEYCHAIN_PASSWORD=$(uuidgen)
+          
+          # Create keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          
+          # Import certificate
+          echo "$CERTIFICATE_BASE64" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
+          security import "$RUNNER_TEMP/certificate.p12" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH" -P "$P12_PASSWORD"
+          
+          # List the keychain to verify
+          security list-keychains -d user -s "$KEYCHAIN_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+
+      - name: Setup Notarization
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.sign == 'true')
+        env:
+          NOTARIZATION_PASSWORD: ${{ secrets.NOTARIZATION_PASSWORD }}
+        run: |
+          # Store notarization credentials for this build
+          echo "$NOTARIZATION_PASSWORD" | xcrun notarytool store-credentials "github-actions" \
+            --apple-id "$APPLE_ID" \
+            --team-id "$TEAM_ID" \
+            --password
+
+      - name: Sign and Notarize
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.sign == 'true')
+        run: |
+          APP_PATH="dist/NameMyPdf.app"
+          DMG_PATH="dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg"
+          
+          echo "🔐 Signing app bundle..."
+          codesign \
+            --force \
+            --options runtime \
+            --timestamp \
+            --sign "$DEVELOPER_ID_APPLICATION" \
+            --verbose \
+            "$APP_PATH"
+          
+          echo "✅ Verifying app signature..."
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          
+          echo "📦 Creating signed DMG..."
+          create-dmg \
+            --volname "NameMyPdf v${{ steps.version.outputs.VERSION }}" \
+            --volicon "icon.icns" \
+            --window-pos 200 120 \
+            --window-size 800 450 \
+            --icon-size 100 \
+            --icon "NameMyPdf.app" 200 190 \
+            --hide-extension "NameMyPdf.app" \
+            --app-drop-link 600 190 \
+            --hdiutil-quiet \
+            --overwrite \
+            "$DMG_PATH" \
+            "dist/"
+          
+          echo "📝 Signing DMG..."
+          codesign \
+            --force \
+            --timestamp \
+            --sign "$DEVELOPER_ID_APPLICATION" \
+            --verbose \
+            "$DMG_PATH"
+          
+          echo "🚀 Submitting for notarization..."
+          xcrun notarytool submit "$DMG_PATH" \
+            --keychain-profile "github-actions" \
+            --wait \
+            --output-format json > notarization-result.json
+          
+          # Check if notarization succeeded
+          STATUS=$(cat notarization-result.json | jq -r '.status')
+          if [ "$STATUS" != "Accepted" ]; then
+            echo "❌ Notarization failed with status: $STATUS"
+            cat notarization-result.json
+            exit 1
+          fi
+          
+          SUBMISSION_ID=$(cat notarization-result.json | jq -r '.id')
+          echo "✅ Notarization successful! Submission ID: $SUBMISSION_ID"
+          
+          echo "📎 Stapling notarization to app..."
+          xcrun stapler staple "$APP_PATH"
+          
+          echo "📎 Stapling notarization to DMG..."
+          xcrun stapler staple "$DMG_PATH"
+          
+          echo "🔍 Final verification..."
+          xcrun stapler validate "$APP_PATH"
+          xcrun stapler validate "$DMG_PATH"
+          spctl --assess --type exec --verbose=4 "$APP_PATH"
+
+      - name: Create ZIP archive (unsigned fallback)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.sign == 'false'
+        run: |
+          # Create unsigned DMG and ZIP for testing
+          create-dmg \
+            --volname "NameMyPdf v${{ steps.version.outputs.VERSION }} (Unsigned)" \
+            --volicon "icon.icns" \
+            --window-pos 200 120 \
+            --window-size 800 450 \
+            --icon-size 100 \
+            --icon "NameMyPdf.app" 200 190 \
+            --hide-extension "NameMyPdf.app" \
+            --app-drop-link 600 190 \
+            --hdiutil-quiet \
+            --overwrite \
+            "dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}-unsigned.dmg" \
+            "dist/"
+          
+          zip -r "dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}-unsigned.zip" "dist/NameMyPdf.app" --exclude="*.DS_Store"
+
+      - name: Create ZIP from signed app
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.sign == 'true')
+        run: |
+          cd dist
+          zip -r "NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip" "NameMyPdf.app" --exclude="*.DS_Store"
+
+      - name: Verify build outputs
+        run: |
+          ls -la dist/
+          if [ -f "dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg" ]; then
+            echo "Signed DMG size: $(ls -lh dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg | awk '{print $5}')"
+            echo "Signed ZIP size: $(ls -lh dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip | awk '{print $5}')"
+          fi
+          if [ -f "dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}-unsigned.dmg" ]; then
+            echo "Unsigned DMG size: $(ls -lh dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}-unsigned.dmg | awk '{print $5}')"
+            echo "Unsigned ZIP size: $(ls -lh dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}-unsigned.zip | awk '{print $5}')"
+          fi
+
+      - name: Create Release (Signed)
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          name: "NameMyPdf v${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## NameMyPdf v${{ steps.version.outputs.VERSION }}
+
+            ### ✅ Apple Signed & Notarized Release
+            
+            This release is **code signed and notarized by Apple**. No security warnings will appear when installing.
+
+            ### Download Options
+            - **DMG (Recommended)**: `NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg` - Drag and drop installer
+            - **ZIP Archive**: `NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip` - Manual installation
+
+            ### Installation
+
+            #### DMG Installation (Recommended)
+            1. Download the `.dmg` file
+            2. Double-click to mount the disk image  
+            3. Drag `NameMyPdf.app` to the Applications folder
+            4. **The app will open without any security warnings** ✅
+
+            #### ZIP Installation
+            1. Download and extract the `.zip` file
+            2. Move `NameMyPdf.app` to your Applications folder
+            3. **The app will open without any security warnings** ✅
+
+            ### System Requirements
+            - macOS 10.11.0 (El Capitan) or later
+            - Universal binary (Intel & Apple Silicon)
+            - **No external dependencies required** - all tools are bundled!
+
+            ### What's New
+            - 🔒 **Apple Code Signed & Notarized** - No security warnings
+            - ✨ **Standalone app** - No need to install Homebrew, poppler, or jq
+            - 🔧 Bundled binaries: `pdftotext` (from Xpdf 4.05) and `jq` (1.7.1)
+            - 🍎 Universal binaries work natively on both Intel and Apple Silicon Macs
+
+            ### Usage
+            Drag PDF files with DOI information onto the app icon to automatically rename them in the format: `Author Year - Title.pdf`
+
+          files: |
+            dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg
+            dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}.zip
+          draft: false
+          prerelease: false
+
+      - name: Upload artifacts (for manual workflow runs)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: NameMyPdf-v${{ steps.version.outputs.VERSION }}
+          path: |
+            dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}*.dmg
+            dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}*.zip
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Clean up temporary files and keychains
+          rm -f "$RUNNER_TEMP/certificate.p12"
+          rm -f notarization-result.json
+          if [ -n "${KEYCHAIN_PATH:-}" ] && [ -f "$KEYCHAIN_PATH" ]; then
+            security delete-keychain "$KEYCHAIN_PATH" || true
+          fi

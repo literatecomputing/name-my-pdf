@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+ /Applications/Platypus.app/Contents/Resources/platypus_clt \
+            --name "NameMyPdf" \
+            --author "Jay Pfaffman" \
+            --app-version "0.2" \
+            --bundle-identifier "com.literatecomputing.namemypdf" \
+            --interface-type "Progress Bar" \
+            --interpreter "/usr/bin/env" \
+            --app-icon "icon.icns" \
+            --uniform-type-identifiers "com.adobe.pdf" \
+            --overwrite \
+            --droppable \
+            --quit-after-execution \
+            "normalize_filename.sh" \
+            dist/NameMyPdf.app
+codesign -f -o runtime --timestamp -s "Developer ID Application: Jay Pfaffman (B9YN7Q93P9)" dist/NameMyPdf.app      
+create-dmg --overwrite dist/NameMyPdf.app dist/
+
+xcrun altool --notarize-app --primary-bundle-id "com.literatecomputing.namemypdf" -u "jay@literatecomputing.com" -p "nzxe-jstr-hsly-purn" -t osx -f dist/NameMyPdf.dmg
+
+

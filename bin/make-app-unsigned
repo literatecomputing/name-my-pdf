@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Updated make-app script - build only (no signing)
+# Use bin/sign-and-notarize after building for Apple signing
+
+# Ensure dist directory exists
+mkdir -p dist
+
+# Remove any existing app
+rm -rf dist/NameMyPdf.app
+
+# Build the app using Platypus
+/Applications/Platypus.app/Contents/Resources/platypus_clt \
+    --name "NameMyPdf" \
+    --author "Jay Pfaffman" \
+    --app-version "0.3" \
+    --bundle-identifier "com.literatecomputing.namemypdf" \
+    --interface-type "Progress Bar" \
+    --interpreter "/usr/bin/env" \
+    --app-icon "icon.icns" \
+    --uniform-type-identifiers "com.adobe.pdf" \
+    --overwrite \
+    --droppable \
+    --quit-after-execution \
+    "normalize_filename.sh" \
+    dist/NameMyPdf.app
+
+echo ""
+echo "✅ App built successfully at dist/NameMyPdf.app"
+echo ""
+echo "Next steps:"
+echo "1. Test the app locally: open dist/NameMyPdf.app"
+echo "2. Sign and notarize: ./bin/sign-and-notarize"
+echo ""
