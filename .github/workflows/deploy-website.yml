@@ -43,11 +43,3 @@ jobs:
           # remove: "true"
           upload: "true"
           purgePullZone: "true"
-
-      - name: Purge Bunny CDN Cache (optional)
-        if: success()
-        run: |
-          # Purge the CDN cache to ensure latest content is served
-          curl -X POST "https://api.bunny.net/pullzone/${{ secrets.BUNNY_PULLZONE_ID }}/purgeCache" \
-            -H "AccessKey: ${{ secrets.BUNNY_ACCESS_KEY }}" \
-            || echo "Cache purge failed or not configured (optional)"
