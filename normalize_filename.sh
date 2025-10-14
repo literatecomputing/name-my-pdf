@@ -347,7 +347,7 @@ done
 debug_message "==================== Session End ===================="
 
 # Show error popups only if running inside Platypus (macOS GUI), not CLI, and not disabled
-if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISABLE_WARNINGS}" != "true" ]] && [[ ${#ERRORS[@]} -gt 0 ]]; then
+if [[ "$OSTYPE" == "darwin"* ]] && [[ "$0" == *".app/Contents/Resources/script" ]] && [[ "${DISABLE_WARNINGS}" != "true" ]] && [[ ${#ERRORS[@]} -gt 0 ]]; then
   debug_message "Showing ${#ERRORS[@]} error popups in GUI mode"
   if [[ ${#ERRORS[@]} -le 5 ]]; then
     for err in "${ERRORS[@]}"; do
@@ -366,8 +366,6 @@ if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISA
     osascript -e "display alert \"NameMyPdf Errors\" message \"$summary\" as critical" &
     sleep 0.1
   fi
-  # Wait a moment for dialogs to be visible before script exits
-  sleep 10
 else
-  debug_message "Skipping GUI error popups: OSTYPE=$OSTYPE, PLATYPUS_APP_BUNDLE=$PLATYPUS_APP_BUNDLE, DISABLE_WARNINGS=$DISABLE_WARNINGS, ERRORS=${#ERRORS[@]}"
+  debug_message "Skipping GUI error popups: OSTYPE=$OSTYPE, is_platypus_app=$is_platypus_app, DISABLE_WARNINGS=$DISABLE_WARNINGS, ERRORS=${#ERRORS[@]}"
 fi
