@@ -19,20 +19,20 @@ RELEASE_URL="https://github.com/literatecomputing/name-my-pdf/releases/download/
 TODAY=$(date '+%B %d, %Y')
 
 # Update DMG/ZIP links in README.md
-sed -i "/VERSION-UPDATE-START/,/VERSION-UPDATE-END/c\\
-<!-- VERSION-UPDATE-START -->\n- **Download DMG**: [$DMG]($RELEASE_URL/$DMG)\n- **Download ZIP**: [$ZIP]($RELEASE_URL/$ZIP)\n<!-- VERSION-UPDATE-END -->" README.md
+sed -i.bak "/VERSION-UPDATE-START/,/VERSION-UPDATE-END/c\\
+<!-- VERSION-UPDATE-START -->\n- **Download DMG**: [$DMG]($RELEASE_URL/$DMG)\n- **Download ZIP**: [$ZIP]($RELEASE_URL/$ZIP)\n<!-- VERSION-UPDATE-END -->" README.md && rm README.md.bak
 
 # Update download buttons in docs/download.md
-sed -i "s|https://github.com/literatecomputing/name-my-pdf/releases/download/v[0-9]\+\.[0-9]\+\.[0-9]\+/NameMyPdf-v[0-9]\+\.[0-9]\+\.[0-9]\+\.dmg|$RELEASE_URL/$DMG|g" docs/download.md
-sed -i "s|https://github.com/literatecomputing/name-my-pdf/releases/download/v[0-9]\+\.[0-9]\+\.[0-9]\+/NameMyPdf-v[0-9]\+\.[0-9]\+\.[0-9]\+\.zip|$RELEASE_URL/$ZIP|g" docs/download.md
+sed -i.bak "s|https://github.com/literatecomputing/name-my-pdf/releases/download/v[0-9]\+\.[0-9]\+\.[0-9]\+/NameMyPdf-v[0-9]\+\.[0-9]\+\.[0-9]\+\.dmg|$RELEASE_URL/$DMG|g" docs/download.md && rm docs/download.md.bak
+sed -i.bak "s|https://github.com/literatecomputing/name-my-pdf/releases/download/v[0-9]\+\.[0-9]\+\.[0-9]\+/NameMyPdf-v[0-9]\+\.[0-9]\+\.[0-9]\+\.zip|$RELEASE_URL/$ZIP|g" docs/download.md && rm docs/download.md.bak
 
 # Update version and date in docs/download.md
-sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/${TAG}/g" docs/download.md
-sed -i "s/\*\*Last Updated:\*\* .*/\*\*Last Updated:\*\* $TODAY/g" docs/download.md
+sed -i.bak "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/${TAG}/g" docs/download.md && rm docs/download.md.bak
+sed -i.bak "s/\*\*Last Updated:\*\* .*/\*\*Last Updated:\*\* $TODAY/g" docs/download.md && rm docs/download.md.bak
 
 # Update quick start and button in docs/index.md
-sed -i "s|\[Download Latest Release\](/download.html).*VERSION-UPDATE-MARKER.*|[Download Latest Release](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->|" docs/index.md
-sed -i "s|Download\*\* the latest .dmg file from \[Download Page\](/download.html).*VERSION-UPDATE-MARKER.*|Download** the latest .dmg file from [Download Page](/download.html) <!-- VERSION-UPDATE-MARKER -->|" docs/index.md
+sed -i.bak "s|\[Download Latest Release\](/download.html).*VERSION-UPDATE-MARKER.*|[Download Latest Release](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->|" docs/index.md && rm docs/index.md.bak
+sed -i.bak "s|Download\*\* the latest .dmg file from \[Download Page\](/download.html).*VERSION-UPDATE-MARKER.*|Download** the latest .dmg file from [Download Page](/download.html) <!-- VERSION-UPDATE-MARKER -->|" docs/index.md && rm docs/index.md.bak
 
 # Commit, tag, and push
 
