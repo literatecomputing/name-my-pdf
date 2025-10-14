@@ -77,8 +77,7 @@ This repository uses GitHub Actions to automatically build and release the app w
 
 ```bash
 # Create and push a new release
-git tag v1.1.0
-git push origin v1.1.0
+bin/tag-release.sh v0.9.22
 ```
 
 The workflow will:
