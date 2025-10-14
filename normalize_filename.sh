@@ -352,12 +352,9 @@ if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISA
   if [[ ${#ERRORS[@]} -le 5 ]]; then
     for err in "${ERRORS[@]}"; do
       debug_message "Displaying error popup: $err"
-      # Use a more robust AppleScript with here document
-      osascript <<EOF
-        tell application "System Events"
-          display alert "NameMyPdf Error" message "$err" as critical
-        end tell
-EOF
+      # Try a simpler approach - just display alert directly
+      osascript -e "display alert \"NameMyPdf Error\" message \"$err\" as critical" &
+      sleep 0.1  # Small delay to let the dialog appear
     done
   else
     # Show summary popup
@@ -366,12 +363,11 @@ EOF
       summary+="$err\n"
     done
     debug_message "Displaying summary error popup"
-    osascript <<EOF
-        tell application "System Events"
-          display alert "NameMyPdf Errors" message "$summary" as critical
-        end tell
-EOF
+    osascript -e "display alert \"NameMyPdf Errors\" message \"$summary\" as critical" &
+    sleep 0.1
   fi
+  # Wait a moment for dialogs to be visible before script exits
+  sleep 10
 else
   debug_message "Skipping GUI error popups: OSTYPE=$OSTYPE, PLATYPUS_APP_BUNDLE=$PLATYPUS_APP_BUNDLE, DISABLE_WARNINGS=$DISABLE_WARNINGS, ERRORS=${#ERRORS[@]}"
 fi
