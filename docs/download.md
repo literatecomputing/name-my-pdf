@@ -65,7 +65,7 @@ Get the latest version of NameMyPdf for macOS.
 
 ✅ **Universal Binary** - Runs natively on both Intel and Apple Silicon Macs  
 ✅ **GUI App** - Drag-and-drop interface  
-✅ **CLI Installer** - Optional command-line tool (see [Documentation]({{ site.baseurl }}{% link documentation.md %}))
+✅ **CLI Installer** - Optional command-line tool (see [Documentation](documentation.html#command-line-usage))
 
 ---
 
