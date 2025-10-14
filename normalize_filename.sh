@@ -215,57 +215,27 @@ capitalize_author_name() {
 show_app_menu() {
   debug_message "Showing app menu (no files provided)"
   
-  # Show menu with buttons instead of list to avoid permissions issues
-  local choice
-  choice=$(osascript 2>/dev/null <<EOF
-set buttonPressed to button returned of (display dialog "What would you like to do?" with title "NameMyPdf" buttons {"Edit Config", "GitHub", "Donate", "Documentation", "Cancel"} default button "Edit Config")
-return buttonPressed
+  # Use AppleScript to handle the menu and actions directly
+  osascript 2>/dev/null <<EOF
+try
+    set userChoice to button returned of (display dialog "What would you like to do?" with title "NameMyPdf" buttons {"Edit Config", "GitHub", "Donate", "Documentation", "Cancel"} default button "Edit Config")
+    
+    if userChoice is "Edit Config" then
+        tell application "Terminal"
+            do script "open -e ~/.namemypdfrc"
+            activate
+        end tell
+    else if userChoice is "GitHub" then
+        tell application "Finder" to open location "https://github.com/literatecomputing/name-my-pdf"
+    else if userChoice is "Donate" then
+        tell application "Finder" to open location "https://www.namemypdf.com/donate.html"
+    else if userChoice is "Documentation" then
+        tell application "Finder" to open location "https://www.namemypdf.com/documentation.html"
+    end if
+on error
+    -- Error handling
+end try
 EOF
-)
-  
-  debug_message "Menu choice: $choice"
-  
-  case "$choice" in
-    "Edit Config")
-      debug_message "Opening config file for editing"
-      if [[ "$OSTYPE" == "darwin"* ]]; then
-        open -e ~/.namemypdfrc 2>/dev/null &
-      else
-        echo "Edit ~/.namemypdfrc to change settings"
-        read -p "Press Enter to continue..."
-      fi
-      ;;
-    "GitHub")
-      debug_message "Opening GitHub page"
-      if [[ "$OSTYPE" == "darwin"* ]]; then
-        open "https://github.com/literatecomputing/name-my-pdf" 2>/dev/null &
-      else
-        echo "Visit: https://github.com/literatecomputing/name-my-pdf"
-        read -p "Press Enter to continue..."
-      fi
-      ;;
-    "Donate")
-      debug_message "Opening donation page"
-      if [[ "$OSTYPE" == "darwin"* ]]; then
-        open "https://www.namemypdf.com/donate.html" 2>/dev/null &
-      else
-        echo "Visit: https://www.namemypdf.com/donate.html"
-        read -p "Press Enter to continue..."
-      fi
-      ;;
-    "Documentation")
-      debug_message "Opening documentation"
-      if [[ "$OSTYPE" == "darwin"* ]]; then
-        open "https://www.namemypdf.com/documentation.html" 2>/dev/null &
-      else
-        echo "Visit: https://www.namemypdf.com/documentation.html"
-        read -p "Press Enter to continue..."
-      fi
-      ;;
-    "Cancel"|*)
-      debug_message "Menu cancelled or invalid choice"
-      ;;
-  esac
 }
 
 # Detect if running in Platypus app bundle
