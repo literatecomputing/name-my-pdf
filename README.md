@@ -18,6 +18,8 @@ NameMyPdf is a macOS application that automatically renames academic PDF files u
 
 ### Installation Options
 
+See full instructions at [NameMyPdf.com](https://www.namemypdf.com/download.html)
+
 #### Option 1: DMG Installer (Recommended)
 
 1. Download the `.dmg` file from the latest release
