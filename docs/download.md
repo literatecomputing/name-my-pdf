@@ -20,6 +20,7 @@ Get the latest version of NameMyPdf for macOS.
 **Current Version:** v0.9.23 ([release details](https://github.com/literatecomputing/name-my-pdf/releases/tag/v0.9.23))
 
 **Last Updated:** October 14, 2025
+
 </div>
 
 [Download DMG (Recommended)](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.23/NameMyPdf-v0.9.23.dmg){: .btn .btn-primary .btn-purple } <!-- VERSION-UPDATE-START -->
