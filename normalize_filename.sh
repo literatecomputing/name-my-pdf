@@ -215,55 +215,48 @@ capitalize_author_name() {
 show_app_menu() {
   debug_message "Showing app menu (no files provided)"
   
-  # Show menu with options
+  # Show menu with buttons instead of list to avoid permissions issues
   local choice
-  choice=$(osascript <<EOF
-tell application "System Events"
-    set menuList to {"Edit Configuration", "Open GitHub Page", "Support/Donate", "View Documentation", "Cancel"}
-    set selectedMenu to choose from list menuList with title "NameMyPdf" with prompt "What would you like to do?" default items {"Edit Configuration"}
-    if selectedMenu is false then
-        return "Cancel"
-    else
-        return item 1 of selectedMenu
-    end if
-end tell
+  choice=$(osascript 2>/dev/null <<EOF
+set buttonPressed to button returned of (display dialog "What would you like to do?" with title "NameMyPdf" buttons {"Edit Config", "GitHub", "Donate", "Documentation", "Cancel"} default button "Edit Config")
+return buttonPressed
 EOF
 )
   
   debug_message "Menu choice: $choice"
   
   case "$choice" in
-    "Edit Configuration")
+    "Edit Config")
       debug_message "Opening config file for editing"
       if [[ "$OSTYPE" == "darwin"* ]]; then
-        open -e ~/.namemypdfrc
+        open -e ~/.namemypdfrc 2>/dev/null &
       else
         echo "Edit ~/.namemypdfrc to change settings"
         read -p "Press Enter to continue..."
       fi
       ;;
-    "Open GitHub Page")
+    "GitHub")
       debug_message "Opening GitHub page"
       if [[ "$OSTYPE" == "darwin"* ]]; then
-        open "https://github.com/literatecomputing/name-my-pdf"
+        open "https://github.com/literatecomputing/name-my-pdf" 2>/dev/null &
       else
         echo "Visit: https://github.com/literatecomputing/name-my-pdf"
         read -p "Press Enter to continue..."
       fi
       ;;
-    "Support/Donate")
+    "Donate")
       debug_message "Opening donation page"
       if [[ "$OSTYPE" == "darwin"* ]]; then
-        open "https://www.namemypdf.com/donate.html"
+        open "https://www.namemypdf.com/donate.html" 2>/dev/null &
       else
         echo "Visit: https://www.namemypdf.com/donate.html"
         read -p "Press Enter to continue..."
       fi
       ;;
-    "View Documentation")
+    "Documentation")
       debug_message "Opening documentation"
       if [[ "$OSTYPE" == "darwin"* ]]; then
-        open "https://www.namemypdf.com/documentation.html"
+        open "https://www.namemypdf.com/documentation.html" 2>/dev/null &
       else
         echo "Visit: https://www.namemypdf.com/documentation.html"
         read -p "Press Enter to continue..."
