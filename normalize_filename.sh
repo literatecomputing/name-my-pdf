@@ -211,6 +211,84 @@ capitalize_author_name() {
   fi
 }
 
+# Function to show menu when no files are provided (double-click)
+show_app_menu() {
+  debug_message "Showing app menu (no files provided)"
+  
+  # Show menu with options
+  local choice
+  choice=$(osascript <<EOF
+tell application "System Events"
+    set menuList to {"Edit Configuration", "Open GitHub Page", "Support/Donate", "View Documentation", "Cancel"}
+    set selectedMenu to choose from list menuList with title "NameMyPdf" with prompt "What would you like to do?" default items {"Edit Configuration"}
+    if selectedMenu is false then
+        return "Cancel"
+    else
+        return item 1 of selectedMenu
+    end if
+end tell
+EOF
+)
+  
+  debug_message "Menu choice: $choice"
+  
+  case "$choice" in
+    "Edit Configuration")
+      debug_message "Opening config file for editing"
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open -e ~/.namemypdfrc
+      else
+        echo "Edit ~/.namemypdfrc to change settings"
+        read -p "Press Enter to continue..."
+      fi
+      ;;
+    "Open GitHub Page")
+      debug_message "Opening GitHub page"
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://github.com/literatecomputing/name-my-pdf"
+      else
+        echo "Visit: https://github.com/literatecomputing/name-my-pdf"
+        read -p "Press Enter to continue..."
+      fi
+      ;;
+    "Support/Donate")
+      debug_message "Opening donation page"
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://www.namemypdf.com/donate.html"
+      else
+        echo "Visit: https://www.namemypdf.com/donate.html"
+        read -p "Press Enter to continue..."
+      fi
+      ;;
+    "View Documentation")
+      debug_message "Opening documentation"
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://www.namemypdf.com/documentation.html"
+      else
+        echo "Visit: https://www.namemypdf.com/documentation.html"
+        read -p "Press Enter to continue..."
+      fi
+      ;;
+    "Cancel"|*)
+      debug_message "Menu cancelled or invalid choice"
+      ;;
+  esac
+}
+
+# Detect if running in Platypus app bundle
+is_platypus_app=false
+if [[ -n "$PLATYPUS_APP_BUNDLE" ]] || [[ "$0" == *".app/Contents/Resources/script" ]] || [[ -n "$PLATYPUS_SCRIPT_PATH" ]]; then
+  is_platypus_app=true
+fi
+
+# Check if no files were provided (double-click) AND running in Platypus app
+if [ $# -eq 0 ] && [[ "$is_platypus_app" == "true" ]]; then
+  debug_message "No files provided in GUI mode - showing app menu"
+  show_app_menu
+  debug_message "==================== Session End ===================="
+  exit 0
+fi
+
 for item in "$@"; do
   # Get full path for the input file
   ITEM_ABS_PATH=$(realpath "$item")
