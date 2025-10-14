@@ -7,11 +7,12 @@ NameMyPdf is a macOS application that automatically renames academic PDF files u
 ### Latest Release
 
 <!-- VERSION-UPDATE-START -->
+
 - **Download DMG**: [NameMyPdf-v0.9.23.dmg](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.23/NameMyPdf-v0.9.23.dmg)
 - **Download ZIP**: [NameMyPdf-v0.9.23.zip](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.23/NameMyPdf-v0.9.23.zip)
 <!-- VERSION-UPDATE-END -->
 - **Compatibility**: macOS 10.11.0+ (Universal: Intel & Apple Silicon)
-- **Installation Guide**: See [INSTALL.md](./INSTALL.md) for detailed instructions
+- **Installation Guide**: See [Download Page](https://www.namemypdf.com/download.html) for detailed instructions
 
 ### Installation Options
 
@@ -69,59 +70,7 @@ This creates a `namemypdf` command that calls the bundled script directly.
 ## 📋 System Requirements
 
 - **macOS**: 10.11.0 (El Capitan) or later
-- **Dependencies**: `poppler`, `jq`, `curl` (install via Homebrew)
 - **Internet**: Required for metadata lookup
-
-## 🔧 Development
-
-### Automated Builds
-
-This repository uses GitHub Actions to automatically build and release the app when you push a git tag:
-
-```bash
-# Create and push a new release
-bin/tag-release.sh v0.9.22
-```
-
-The workflow will:
-
-- Build the app using Platypus on macOS runners
-- Create both ZIP and DMG distribution packages
-- Generate a GitHub release with download links
-- Include professional DMG with drag-to-Applications interface
-
-### Manual Builds
-
-You can also trigger builds manually from the GitHub Actions tab, or build locally using Platypus.
-
-## 🧪 Testing
-
-The project includes automated tests for PDF renaming functionality:
-
-```bash
-# Run tests
-cd test-pdfs
-./test_rename.sh
-```
-
-Tests validate:
-
-- ✅ Successful PDF renaming with complete metadata
-- ✅ Multi-author papers (first author extraction)
-- ✅ Error handling for incomplete CrossRef data
-- ✅ Expected failure cases (missing author fields)
-
-Tests run automatically on every push and pull request via GitHub Actions on both Ubuntu and macOS.
-
-See [test-pdfs/README.md](./test-pdfs/README.md) for details.
-
-### API Usage
-
-Per CrossRef documentation, we include a User-Agent header and recommend adding an email for API identification:
-
-> If you're using a script or app that regularly queries our API, add a User-Agent header. This can help us to troubleshoot issues and give you more specific feedback if we do need to contact you.
-
-Source: [CrossRef REST API Tips](https://www.crossref.org/documentation/retrieve-metadata/rest-api/tips-for-using-the-crossref-rest-api/)
 
 ## 📝 Release Notes
 
