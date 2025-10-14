@@ -164,7 +164,7 @@ jobs:
             --bundle-identifier "com.literatecomputing.namemypdf" \
             --author "Jay Pfaffman" \
             --app-version "${{ steps.version.outputs.VERSION }}" \
-            --interface-type "Droplet" \
+            --interface-type "Progress Bar" \
             --interpreter "/bin/bash" \
             --droppable \
             --text-droppable \
