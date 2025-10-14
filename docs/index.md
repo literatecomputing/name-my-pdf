@@ -10,10 +10,10 @@ permalink: /
 
 {: .fs-9 }
 
-Automatically rename academic PDF files using metadata from their DOI.
+[Automatically rename academic PDF files using metadata from their DOI.](#)
 {: .fs-6 .fw-300 }
 
-[Download Latest Release](https://github.com/literatecomputing/name-my-pdf/releases/latest){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[Download Latest Release](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->
 [View on GitHub](https://github.com/literatecomputing/name-my-pdf){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
@@ -36,7 +36,7 @@ Optional CLI tool for terminal users
 
 ## 🚀 Quick Start
 
-1. **Download** the latest `.dmg` file from [releases](https://github.com/literatecomputing/name-my-pdf/releases/latest)
+1. **Download** the latest `.dmg` file from [Download Page](/download.html) <!-- VERSION-UPDATE-MARKER -->
 2. **Install** by dragging NameMyPdf.app to your Applications folder
 3. **Allow Access** App is not signed by Apple so you have to start it and "Open Anyway" from System "Security" (scroll to bottom) See [Download Page](/download.html) for details
 4. **Edit the Configuration** The first time, you'll be presented with the configuration file in TextEdit. You can adjust the filename to your liking.
