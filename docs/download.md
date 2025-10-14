@@ -7,6 +7,8 @@ description: "Download NameMyPdf for macOS"
 
 # Download NameMyPdf
 
+[Support NameMyPdf](/donate.html){: .btn .btn-green .fs-5 .mb-4 .mb-md-0 .mr-2 }
+
 {: .no_toc }
 
 Get the latest version of NameMyPdf for macOS.

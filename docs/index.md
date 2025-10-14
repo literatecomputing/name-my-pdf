@@ -14,6 +14,7 @@ permalink: /
 {: .fs-6 .fw-300 }
 
 [Download](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->
+[Support NameMyPdf](/donate.html){: .btn .btn-green .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [View on GitHub](https://github.com/literatecomputing/name-my-pdf){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
