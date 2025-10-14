@@ -6,7 +6,7 @@
             --bundle-identifier "com.literatecomputing.namemypdf" \
             --interface-type "Progress Bar" \
             --interpreter "/usr/bin/env" \
-            --app-icon "icon.icns" \
+            --app-icon "icons/icon.icns" \
             --uniform-type-identifiers "com.adobe.pdf" \
             --overwrite \
             --droppable \

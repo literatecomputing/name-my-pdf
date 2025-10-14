@@ -160,7 +160,7 @@ jobs:
           # Create the app using Platypus
           platypus \
             --name "NameMyPdf" \
-            --app-icon "icon.icns" \
+            --app-icon "icons/icon.icns" \
             --bundle-identifier "com.literatecomputing.namemypdf" \
             --author "Jay Pfaffman" \
             --app-version "${{ steps.version.outputs.VERSION }}" \
@@ -200,7 +200,7 @@ jobs:
           # Create the DMG with drag-to-Applications functionality
           create-dmg \
             --volname "NameMyPdf v${{ steps.version.outputs.VERSION }}" \
-            --volicon "icon.icns" \
+            --volicon "icons/icon.icns" \
             --window-pos 200 120 \
             --window-size 800 450 \
             --icon-size 100 \

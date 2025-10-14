@@ -29,7 +29,7 @@ brew install poppler jq
 # Build app with Platypus
 /usr/local/bin/platypus \
   --name "NameMyPdf" \
-  --app-icon "icon.icns" \
+  --app-icon "icons/icon.icns" \
   --bundle-identifier "com.literatecomputing.namemypdf" \
   --author "Jay Pfaffman" \
   --app-version "1.0.0-dev" \
@@ -80,7 +80,7 @@ cp -R NameMyPdf.app dmg-contents/
 
 create-dmg \
   --volname "NameMyPdf v1.1.0" \
-  --volicon "icon.icns" \
+  --volicon "icons/icon.icns" \
   --window-pos 200 120 \
   --window-size 800 450 \
   --icon-size 100 \
@@ -123,7 +123,7 @@ name-my-pdf/
 ├── NameMyPdf.app/             # Built app bundle
 ├── icons/                     # App icons in various sizes
 ├── normalize_filename.sh      # Main script (executed by app)
-├── icon.icns                  # App icon for Platypus
+├── icons/icon.icns                  # App icon for Platypus
 ├── README.md                  # Main documentation
 ├── INSTALL.md                 # User installation guide
 ├── create-release.sh          # Release creation script
