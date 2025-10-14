@@ -23,8 +23,13 @@ Get the latest version of NameMyPdf for macOS.
 
 </div>
 
-[Download DMG (Recommended)](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.23/NameMyPdf-v0.9.23.dmg){: .btn .btn-primary .btn-purple } <!-- VERSION-UPDATE-START -->
-[Download ZIP](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.23/NameMyPdf-v0.9.23.zip){: .btn } <!-- VERSION-UPDATE-END -->
+<!-- VERSION-UPDATE-START -->
+
+[Download DMG (Recommended)](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.23/NameMyPdf-v0.9.23.dmg){: .btn .btn-primary .btn-purple }
+[Download ZIP](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.23/NameMyPdf-v0.9.23.zip){: .btn }
+
+<!-- VERSION-UPDATE-END -->
+
 [View All Releases](https://github.com/literatecomputing/name-my-pdf/releases){: .btn }
 
 ---
@@ -35,30 +40,41 @@ Get the latest version of NameMyPdf for macOS.
 
 1. **Download** the `.dmg` file from above
 2. **Open** the downloaded file to mount the disk image
-3. **Drag** `NameMyPdf.app` to the Applications folder icon
-4. **Eject** the disk image
+3. **Drag** `NameMyPdf.app` to the Applications folder icon.
+4. **Eject** the disk image (or close the window)
 5. **Launch** the app:
+
    - Find NameMyPdf in your Applications folder
    - **Right-click** and select **"Open"** (first time only)
-   - Click **"Open"** in the security dialog
+   - Get a scary warning.
+
+   ![Not Opened warning](../images/NameMyPdfNotOpened.png){: width="250" }
+
+   - Search for "Privacy and Security"
+
+     ![Privacy and Security](../images/PrivacySecurity-top.png){: width="250"}
+
+6. **Scroll** to the bottom
+
+   ![Privacy and Security security options](../images/PrivacyAndSecurity-bottom.png){: width="500"}
+
+7. **Open Anyway**
+
+   ![Security open anyway](../images/OpenAnyway.png){: width="500"}
+
+8. **Really Open Anyway** Now tell the **Finder** that it's OK to open it! (Don't Move to Trash!)
+
+   ![Finder Open Anyway](../images/FinderOpenAnyway.png){: width="250"}
 
 {: .note }
 
-> The right-click → Open step is required the first time because the app is not code-signed. After the first launch, you can open it normally.
-
-### ZIP Installation
-
-1. **Download** the `.zip` file from above
-2. **Extract** the ZIP file (usually automatic)
-3. **Move** `NameMyPdf.app` to your Applications folder
-4. **Launch** using the same right-click method above
+> These shenanigans are required required the first time because the app is not code-signed. After the first launch, you can open it normally. I have spent the $100 to register as an Apple Developer; I estimate that it'll take about another $1000 worth of my time to figure out how to accomplish that.
 
 ---
 
 ## What's Included
 
 ✅ **Universal Binary** - Runs natively on both Intel and Apple Silicon Macs  
-✅ **Bundled Tools** - Includes jq and pdftotext (no Homebrew needed)  
 ✅ **GUI App** - Drag-and-drop interface  
 ✅ **CLI Installer** - Optional command-line tool (see [Documentation]({{ site.baseurl }}{% link documentation.md %}))
 

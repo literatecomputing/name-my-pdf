@@ -43,20 +43,11 @@ A progress window will show you what's happening. The app will quit automaticall
 
 NameMyPdf follows this process for each PDF:
 
-```mermaid
-graph LR
-    A[PDF File] --> B[Extract DOI]
-    B --> C[Query CrossRef API]
-    C --> D[Get Metadata (author, year, title, journal, etc)]
-    D --> E[Generate Filename]
-    E --> F[Rename File]
-```
-
 1. **Scans** the first 2 pages of the PDF for a DOI (very old PDFs may not have this)
-2. **Extracts** the DOI using pattern matching
-3. **Queries** the CrossRef API for metadata (author, year, title)
-4. **Generates** a clean filename: `Author Year - Title.pdf`
-5. **Renames** the file in place
+2. **Queries** [CrossRef API](https://www.crossref.org/documentation/retrieve-metadata/rest-api/) for metadata (author, year, title) (See [example](https://api.crossref.org/works/10.1016/j.chb.2010.04.008))
+3. **Generates** a clean filename: `Author Year - Title.pdf`
+4. **Renames** the file in place
+5. **Logs** old and new names to `$HOME/Library/Logs/NameMyPdf.log`
 
 ---
 
@@ -80,11 +71,11 @@ Author Year - Title.pdf
 
 ## Configuration
 
-NameMyPdf creates a configuration file at `~/.namemypdfrc` on first run.
+NameMyPdf creates a configuration file at `~/.namemypdfrc` on first run (To edit later use Command+Shift+. to display hidden files in either the Finder or TextEdit)
 
 ### Configuration Options
 
-Edit `~/.namemypdfrc` to customize -- use Command-Shift-. (period) to show hidden files:
+Including your email address makes it possible for Crossref to track the number of users or contact you if you're causing a problem (like by renaming thousands of files? See [this link](https://www.crossref.org/documentation/retrieve-metadata/rest-api/tips-for-using-the-crossref-rest-api/#00831) for their explanation).
 
 ```bash
 # Email for CrossRef API (recommended for heavy usage)
@@ -111,8 +102,9 @@ USE_ABBR_TITLE=false
 # Remove everything after colon in title
 STRIP_TITLE_POST_COLON=true
 
-# Enable debug logging
+# Enable logs for debugging (probably not necesssary) and logging
 DEBUG=false
+LOG=true
 ```
 
 ### Example Configurations
@@ -184,19 +176,7 @@ sudo rm /usr/local/bin/namemypdf
 
 ## Logs and Debugging
 
-NameMyPdf logs all activity to `~/Library/Logs/NameMyPdf.log`.
-
-### View Recent Activity
-
-```bash
-tail ~/Library/Logs/NameMyPdf.log
-```
-
-### Watch Live Activity
-
-```bash
-tail -f ~/Library/Logs/NameMyPdf.log
-```
+NameMyPdf logs all activity to `~/Library/Logs/NameMyPdf.log` (or "$HOME/.namemypdf.log" on non-Macs)
 
 ### Enable Debug Mode
 
@@ -225,18 +205,20 @@ This will show detailed information about:
 
 - Make sure the PDF actually contains DOI information
 - DOI should be on the first 2 pages
-- Some old papers don't have DOIs embedded in the PDF
-- Try extracting the DOI manually and searching CrossRef
+- If it looks like the script should have found the DOI, open an [issue](https://github.com/literatecomputing/name-my-pdf/issues) and describe why you think the script might not have found the DOI.
 
 ### Resource Not Found
 
 **Problem:** "[DOI] --- not found"
 
-**Solutions:**
+**Explanations:**
 
 - The DOI exists in the PDF but isn't in CrossRef database
 - Try manually looking up the DOI at https://doi.org/
 - The DOI might be malformed or incorrect
+- Publishers are surprisingly bad at having correct data in the database. I've seen missing authors (on my own article!) and trash thrown into various fields.
+
+There probably are no solutions.
 
 ### File Not Renamed
 
@@ -250,7 +232,7 @@ This will show detailed information about:
 
 ### Does this work with non-academic PDFs?
 
-No, NameMyPdf specifically looks for DOI information, which is typically only in academic papers. Regular PDFs won't be renamed.
+No, NameMyPdf specifically looks for DOI information, which is typically only in academic papers. PDFs without a DOI on the first two pages won't be renamed.
 
 ### Can I undo a rename?
 
@@ -270,12 +252,11 @@ No, NameMyPdf needs internet access to query the CrossRef API for metadata.
 
 ### Is my data sent anywhere?
 
-Only the DOI is sent to the CrossRef API. No file contents or personal data is transmitted.
+Only the DOI is sent to the CrossRef API when you make the request for the data. No file contents or personal data is transmitted.
 
 ---
 
 ## Need More Help?
 
 - 🐛 [Report a Bug](https://github.com/literatecomputing/name-my-pdf/issues)
-- 💬 [Ask a Question](https://github.com/literatecomputing/name-my-pdf/discussions)
-- 📧 Contact: Check the GitHub repository
+- 📧 Contact: My address is in my [Github Profile](https://github.com/pfaffman)
