@@ -346,8 +346,8 @@ done
 
 debug_message "==================== Session End ===================="
 
-# Show error popups if needed (macOS only, not CLI, and not disabled)
-if [[ "$OSTYPE" == "darwin"* ]] && [[ "${DISABLE_WARNINGS}" != "true" ]] && [[ ${#ERRORS[@]} -gt 0 ]]; then
+# Show error popups only if running inside Platypus (macOS GUI), not CLI, and not disabled
+if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISABLE_WARNINGS}" != "true" ]] && [[ ${#ERRORS[@]} -gt 0 ]]; then
   if [[ ${#ERRORS[@]} -le 5 ]]; then
     for err in "${ERRORS[@]}"; do
       osascript -e "display dialog \"NameMyPdf Error: $err\" buttons {\"OK\"} default button \"OK\""
