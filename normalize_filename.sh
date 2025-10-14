@@ -23,6 +23,7 @@ if [[ ! -f ~/.namemypdfrc ]];then
 #
 # Hopefully, the settings are clear from their names. . .
 #
+DISABLE_WARNINGS=false # set to true to suppress error popups in GUI
 # Optionally let crossref know it's you--recommended if you're naming hundreds of files
 # CROSSREF_EMAIL=you@email.com
 DOWNCASE_TITLE=false
@@ -38,6 +39,8 @@ EOF
   open -e ~/.namemypdfrc
 fi
 source ~/.namemypdfrc
+# Error collection array
+ERRORS=()
 
 # Set up logging
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -220,6 +223,7 @@ for item in "$@"; do
     DEBUG=true
     debug_message "No DOI found in: $item"
     echo "No DOI found in $item, skipping"
+    ERRORS+=("$item: No DOI found")
     DEBUG=false
     continue
   fi
@@ -240,6 +244,7 @@ for item in "$@"; do
     DEBUG=true
     debug_message "DOI not found in CrossRef: $DOI"
     echo "$item: $DOI --- not found"
+    ERRORS+=("$item: DOI not found in CrossRef")
     DEBUG=false
     continue
   fi
@@ -252,6 +257,7 @@ for item in "$@"; do
     DEBUG=true
     echo "$item: Failed to extract author from https://api.crossref.org/works/$DOI$MAILTO "
     debug_message "$item: Failed to extract author from https://api.crossref.org/works/$DOI$MAILTO "
+    ERRORS+=("$item: Author missing in CrossRef metadata")
     DEBUG=false
     continue
   fi
@@ -337,4 +343,21 @@ for item in "$@"; do
   fi
 done
 
+
 debug_message "==================== Session End ===================="
+
+# Show error popups if needed (macOS only, not CLI, and not disabled)
+if [[ "$OSTYPE" == "darwin"* ]] && [[ "${DISABLE_WARNINGS}" != "true" ]] && [[ ${#ERRORS[@]} -gt 0 ]]; then
+  if [[ ${#ERRORS[@]} -le 5 ]]; then
+    for err in "${ERRORS[@]}"; do
+      osascript -e "display dialog \"NameMyPdf Error: $err\" buttons {\"OK\"} default button \"OK\""
+    done
+  else
+    # Show summary popup
+    summary="Multiple errors occurred:\n"
+    for err in "${ERRORS[@]}"; do
+      summary+="$err\n"
+    done
+    osascript -e "display dialog \"NameMyPdf Errors:\n$summary\" buttons {\"OK\"} default button \"OK\""
+  fi
+fi
