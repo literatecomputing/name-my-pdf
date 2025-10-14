@@ -350,7 +350,7 @@ debug_message "==================== Session End ===================="
 if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISABLE_WARNINGS}" != "true" ]] && [[ ${#ERRORS[@]} -gt 0 ]]; then
   if [[ ${#ERRORS[@]} -le 5 ]]; then
     for err in "${ERRORS[@]}"; do
-      osascript -e "display dialog \"NameMyPdf Error: $err\" buttons {\"OK\"} default button \"OK\""
+      osascript -e "display alert \"NameMyPdf Error\" message \"$err\" as critical"
     done
   else
     # Show summary popup
@@ -358,6 +358,6 @@ if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISA
     for err in "${ERRORS[@]}"; do
       summary+="$err\n"
     done
-    osascript -e "display dialog \"NameMyPdf Errors:\n$summary\" buttons {\"OK\"} default button \"OK\""
+    osascript -e "display alert \"NameMyPdf Errors\" message \"$summary\" as critical"
   fi
 fi
