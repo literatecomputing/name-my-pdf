@@ -1,9 +1,9 @@
 name: Build, Sign and Release NameMyPdf
 
 on:
-  push:
-    tags:
-      - "v*"
+  # push:
+  #   tags:
+  #     - "v*"
   workflow_dispatch:
     inputs:
       version:
@@ -193,16 +193,16 @@ jobs:
           # Create temporary keychain
           KEYCHAIN_PATH="$RUNNER_TEMP/app-signing.keychain-db"
           KEYCHAIN_PASSWORD=$(uuidgen)
-          
+
           # Create keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
-          
+
           # Import certificate
           echo "$CERTIFICATE_BASE64" | base64 --decode > "$RUNNER_TEMP/certificate.p12"
           security import "$RUNNER_TEMP/certificate.p12" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH" -P "$P12_PASSWORD"
-          
+
           # List the keychain to verify
           security list-keychains -d user -s "$KEYCHAIN_PATH"
           security find-identity -v -p codesigning "$KEYCHAIN_PATH"
@@ -223,7 +223,7 @@ jobs:
         run: |
           APP_PATH="dist/NameMyPdf.app"
           DMG_PATH="dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg"
-          
+
           echo "🔐 Signing app bundle..."
           codesign \
             --force \
@@ -232,10 +232,10 @@ jobs:
             --sign "$DEVELOPER_ID_APPLICATION" \
             --verbose \
             "$APP_PATH"
-          
+
           echo "✅ Verifying app signature..."
           codesign --verify --deep --strict --verbose=2 "$APP_PATH"
-          
+
           echo "📦 Creating signed DMG..."
           create-dmg \
             --volname "NameMyPdf v${{ steps.version.outputs.VERSION }}" \
@@ -250,7 +250,7 @@ jobs:
             --overwrite \
             "$DMG_PATH" \
             "dist/"
-          
+
           echo "📝 Signing DMG..."
           codesign \
             --force \
@@ -258,13 +258,13 @@ jobs:
             --sign "$DEVELOPER_ID_APPLICATION" \
             --verbose \
             "$DMG_PATH"
-          
+
           echo "🚀 Submitting for notarization..."
           xcrun notarytool submit "$DMG_PATH" \
             --keychain-profile "github-actions" \
             --wait \
             --output-format json > notarization-result.json
-          
+
           # Check if notarization succeeded
           STATUS=$(cat notarization-result.json | jq -r '.status')
           if [ "$STATUS" != "Accepted" ]; then
@@ -272,16 +272,16 @@ jobs:
             cat notarization-result.json
             exit 1
           fi
-          
+
           SUBMISSION_ID=$(cat notarization-result.json | jq -r '.id')
           echo "✅ Notarization successful! Submission ID: $SUBMISSION_ID"
-          
+
           echo "📎 Stapling notarization to app..."
           xcrun stapler staple "$APP_PATH"
-          
+
           echo "📎 Stapling notarization to DMG..."
           xcrun stapler staple "$DMG_PATH"
-          
+
           echo "🔍 Final verification..."
           xcrun stapler validate "$APP_PATH"
           xcrun stapler validate "$DMG_PATH"
@@ -304,7 +304,7 @@ jobs:
             --overwrite \
             "dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}-unsigned.dmg" \
             "dist/"
-          
+
           zip -r "dist/NameMyPdf-v${{ steps.version.outputs.VERSION }}-unsigned.zip" "dist/NameMyPdf.app" --exclude="*.DS_Store"
 
       - name: Create ZIP from signed app
@@ -334,7 +334,7 @@ jobs:
             ## NameMyPdf v${{ steps.version.outputs.VERSION }}
 
             ### ✅ Apple Signed & Notarized Release
-            
+
             This release is **code signed and notarized by Apple**. No security warnings will appear when installing.
 
             ### Download Options
