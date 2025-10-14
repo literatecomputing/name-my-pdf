@@ -13,7 +13,7 @@ permalink: /
 [Automatically rename academic PDF files using metadata from their DOI.](#)
 {: .fs-6 .fw-300 }
 
-[Download Latest Release](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->
+[Download](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->
 [View on GitHub](https://github.com/literatecomputing/name-my-pdf){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ---
