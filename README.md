@@ -1,12 +1,13 @@
 # NameMyPdf
 
-NameMyPdf is a macOS application that automatically renames academic PDF files using metadata extracted from their DOI information. Simply drag and drop PDF files onto the app icon to get clean, standardized filenames in the format: `Author Year - Title.pdf`.
+NameMyPdf is a macOS application that automatically renames academic PDF files using metadata extracted from DOI database. Simply drag and drop PDF files onto the app icon to get clean, standardized filenames in the format: `Author Year - Title.pdf`.
 
 ## 📥 Download & Install
 
 ### Latest Release
 
 <!-- VERSION-UPDATE-START -->
+
 - **Download DMG**: [NameMyPdf-v0.9.24.dmg](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.24/NameMyPdf-v0.9.24.dmg)
 - **Download ZIP**: [NameMyPdf-v0.9.24.zip](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.24/NameMyPdf-v0.9.24.zip)
 <!-- VERSION-UPDATE-END -->
