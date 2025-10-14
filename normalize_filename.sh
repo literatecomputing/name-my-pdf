@@ -348,9 +348,16 @@ debug_message "==================== Session End ===================="
 
 # Show error popups only if running inside Platypus (macOS GUI), not CLI, and not disabled
 if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISABLE_WARNINGS}" != "true" ]] && [[ ${#ERRORS[@]} -gt 0 ]]; then
+  debug_message "Showing ${#ERRORS[@]} error popups in GUI mode"
   if [[ ${#ERRORS[@]} -le 5 ]]; then
     for err in "${ERRORS[@]}"; do
-      osascript -e "display alert \"NameMyPdf Error\" message \"$err\" as critical"
+      debug_message "Displaying error popup: $err"
+      # Use a more robust AppleScript with here document
+      osascript <<EOF
+        tell application "System Events"
+          display alert "NameMyPdf Error" message "$err" as critical
+        end tell
+EOF
     done
   else
     # Show summary popup
@@ -358,6 +365,13 @@ if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$PLATYPUS_APP_BUNDLE" ]] && [[ "${DISA
     for err in "${ERRORS[@]}"; do
       summary+="$err\n"
     done
-    osascript -e "display alert \"NameMyPdf Errors\" message \"$summary\" as critical"
+    debug_message "Displaying summary error popup"
+    osascript <<EOF
+        tell application "System Events"
+          display alert "NameMyPdf Errors" message "$summary" as critical
+        end tell
+EOF
   fi
+else
+  debug_message "Skipping GUI error popups: OSTYPE=$OSTYPE, PLATYPUS_APP_BUNDLE=$PLATYPUS_APP_BUNDLE, DISABLE_WARNINGS=$DISABLE_WARNINGS, ERRORS=${#ERRORS[@]}"
 fi
