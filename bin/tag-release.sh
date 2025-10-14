@@ -22,13 +22,13 @@ TODAY=$(date '+%B %d, %Y')
 sed -i "/VERSION-UPDATE-START/,/VERSION-UPDATE-END/c\\
 <!-- VERSION-UPDATE-START -->\n- **Download DMG**: [$DMG]($RELEASE_URL/$DMG)\n- **Download ZIP**: [$ZIP]($RELEASE_URL/$ZIP)\n<!-- VERSION-UPDATE-END -->" README.md
 
-# Update DMG/ZIP links in docs/download.md
-sed -i "/VERSION-UPDATE-START/,/VERSION-UPDATE-END/c\\
-[Download DMG (Recommended)]($RELEASE_URL/$DMG){: .btn .btn-primary .btn-purple } <!-- VERSION-UPDATE-START -->\n[Download ZIP]($RELEASE_URL/$ZIP){: .btn } <!-- VERSION-UPDATE-END -->" docs/download.md
+# Update download buttons in docs/download.md
+sed -i "s|https://github.com/literatecomputing/name-my-pdf/releases/download/v[0-9]\+\.[0-9]\+\.[0-9]\+/NameMyPdf-v[0-9]\+\.[0-9]\+\.[0-9]\+\.dmg|$RELEASE_URL/$DMG|g" docs/download.md
+sed -i "s|https://github.com/literatecomputing/name-my-pdf/releases/download/v[0-9]\+\.[0-9]\+\.[0-9]\+/NameMyPdf-v[0-9]\+\.[0-9]\+\.[0-9]\+\.zip|$RELEASE_URL/$ZIP|g" docs/download.md
 
-# Update version/date block in docs/download.md
-sed -i "/<!-- VERSION-UPDATE-START -->/,/<!-- VERSION-UPDATE-END -->/c\\
-<!-- VERSION-UPDATE-START -->\n<div class=\"code-example\" markdown=\"1\">\n**Current Version:** $TAG ([release details](https://github.com/literatecomputing/name-my-pdf/releases/tag/$TAG))\n**Last Updated:** $TODAY\n</div>\n<!-- VERSION-UPDATE-END -->" docs/download.md
+# Update version and date in docs/download.md
+sed -i "s/v[0-9]\+\.[0-9]\+\.[0-9]\+/${TAG}/g" docs/download.md
+sed -i "s/\*\*Last Updated:\*\* .*/\*\*Last Updated:\*\* $TODAY/g" docs/download.md
 
 # Update quick start and button in docs/index.md
 sed -i "s|\[Download Latest Release\](/download.html).*VERSION-UPDATE-MARKER.*|[Download Latest Release](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->|" docs/index.md
