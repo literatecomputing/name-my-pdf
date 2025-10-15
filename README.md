@@ -8,4 +8,3 @@ NameMyPdf is a macOS application that automatically renames academic PDF files u
 
 [Support NameMyPdf](https://www.namemypdf.com/donate.html)
 
-<!-- VERSION-UPDATE-START -->n- **Download DMG**: [NameMyPdf-v0.9.43.dmg](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.43/NameMyPdf-v0.9.43.dmg)n- **Download ZIP**: [NameMyPdf-v0.9.43.zip](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.43/NameMyPdf-v0.9.43.zip)n<!-- VERSION-UPDATE-END -->
