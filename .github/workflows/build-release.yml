@@ -36,8 +36,8 @@ jobs:
           brew install --cask platypus
 
           # List what's actually in the Platypus app bundle
-          echo "Contents of Platypus Resources:"
-          ls -la /Applications/Platypus.app/Contents/Resources/
+          # echo "Contents of Platypus Resources:"
+          # ls -la /Applications/Platypus.app/Contents/Resources/
 
           # Set up Platypus command-line tool
           sudo mkdir -p /usr/local/bin
@@ -221,7 +221,7 @@ jobs:
           echo "DMG size: $(ls -lh NameMyPdf-v${{ steps.version.outputs.VERSION }}.dmg | awk '{print $5}')"
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           name: "NameMyPdf v${{ steps.version.outputs.VERSION }}"
