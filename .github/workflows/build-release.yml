@@ -158,24 +158,28 @@ jobs:
           grep "DEBUG:" normalize_filename.sh || echo "No DEBUG in source file!"
 
           # Create the app using Platypus
-          platypus \
-            --name "NameMyPdf" \
-            --app-icon "icons/icon.icns" \
-            --bundle-identifier "com.literatecomputing.namemypdf" \
-            --author "Jay Pfaffman" \
-            --app-version "${{ steps.version.outputs.VERSION }}" \
-            --interface-type "Web View" \
-            --interpreter "/bin/bash" \
-            --droppable \
-            --text-droppable \
-            --suffixes "pdf" \
-            --uniform-type-identifiers "com.adobe.pdf" \
-            --bundled-file "bundled-bin/jq" \
-            --bundled-file "bundled-bin/pdftotext" \
-            --bundled-file "install-cli.sh" \
-            --overwrite \
-            "normalize_filename.sh" \
-            "NameMyPdf.app"
+platypus \
+    --name "NameMyPdf" \
+    --app-icon "icons/icon.icns" \
+    --status-item-icon "icons/icon.icns" \
+    --status-item-icon "icons/icon_128x128.png" \
+    --status-item-title "NameMyPdf" \
+    --bundle-identifier "com.literatecomputing.namemypdf" \
+    --author "Jay Pfaffman" \
+    --app-version "1.0.0" \
+    --interface-type "Status Menu" \
+    --interpreter "/bin/bash" \
+    --droppable \
+    --text-droppable \
+    --suffixes "pdf" \
+    --uniform-type-identifiers "com.adobe.pdf" \
+    --bundled-file "bundled-bin/jq" \
+    --bundled-file "bundled-bin/pdftotext" \
+    --bundled-file "install-cli.sh" \
+    --bundled-file "normalize_filename.sh" \
+    --overwrite \
+    "app_launcher.sh" \
+    "dist/NameMyPdf.app"
 
       - name: Verify app bundle
         run: |
