@@ -186,9 +186,9 @@ jobs:
           ls -la NameMyPdf.app/Contents/
           file NameMyPdf.app/Contents/MacOS/NameMyPdf
           echo "=== Checking bundled script ==="
-          head -20 NameMyPdf.app/Contents/Resources/script
+          head -20 NameMyPdf.app/Contents/Resources/normalize_filename.sh
           echo "=== Looking for DEBUG lines ==="
-          grep "DEBUG:" NameMyPdf.app/Contents/Resources/script || echo "No DEBUG lines found"
+          grep "DEBUG:" NameMyPdf.app/Contents/Resources/normalize_filename.sh || echo "No DEBUG lines found"
 
       - name: Create ZIP archive
         run: |
@@ -240,20 +240,10 @@ jobs:
             3. Drag `NameMyPdf.app` to the Applications folder
             4. Right-click the app and select "Open" for first launch (Gatekeeper requirement)
 
-            #### ZIP Installation
-            1. Download and extract the `.zip` file
-            2. Move `NameMyPdf.app` to your Applications folder
-            3. Right-click the app and select "Open" for first launch (Gatekeeper requirement)
-
             ### System Requirements
             - macOS 10.11.0 (El Capitan) or later
             - Universal binary (Intel & Apple Silicon)
             - **No external dependencies required** - all tools are bundled!
-
-            ### What's New
-            - ✨ **Standalone app** - No need to install Homebrew, poppler, or jq
-            - 🔧 Bundled binaries: `pdftotext` (from Xpdf 4.05) and `jq` (1.7.1)
-            - 🍎 Universal binaries work natively on both Intel and Apple Silicon Macs
 
             ### Usage
             Drag PDF files with DOI information onto the app icon to automatically rename them in the format: `Author Year - Title.pdf`
