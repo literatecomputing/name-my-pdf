@@ -116,10 +116,13 @@ echo "Building app with Platypus..."
 platypus \
     --name "NameMyPdf" \
     --app-icon "icons/icon.icns" \
+    --status-item-icon "icons/icon.icns" \
     --bundle-identifier "com.literatecomputing.namemypdf" \
     --author "Jay Pfaffman" \
     --app-version "1.0.0" \
-    --interface-type "Web View" \
+    --interface-type "Status Menu" \
+    --status-item-icon "icons/icon_128x128.png" \
+    --status-item-title "NameMyPdf" \
     --interpreter "/bin/bash" \
     --droppable \
     --text-droppable \
@@ -128,8 +131,9 @@ platypus \
     --bundled-file "bundled-bin/jq" \
     --bundled-file "bundled-bin/pdftotext" \
     --bundled-file "install-cli.sh" \
+    --bundled-file "normalize_filename.sh" \
     --overwrite \
-    "normalize_filename.sh" \
+    "app_launcher.sh" \
     "dist/NameMyPdf.app"
 
 echo "App built successfully: dist/NameMyPdf.app"
