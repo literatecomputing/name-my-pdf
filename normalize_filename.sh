@@ -215,27 +215,123 @@ capitalize_author_name() {
 show_app_menu() {
   debug_message "Showing app menu (no files provided)"
   
-  # Use AppleScript to handle the menu and actions directly
-  osascript 2>/dev/null <<EOF
-try
-    set userChoice to button returned of (display dialog "What would you like to do?" with title "NameMyPdf" buttons {"Edit Config", "GitHub", "Donate", "Documentation", "Cancel"} default button "Edit Config")
-    
-    if userChoice is "Edit Config" then
-        tell application "Terminal"
-            do script "open -e ~/.namemypdfrc"
-            activate
-        end tell
-    else if userChoice is "GitHub" then
-        tell application "Finder" to open location "https://github.com/literatecomputing/name-my-pdf"
-    else if userChoice is "Donate" then
-        tell application "Finder" to open location "https://www.namemypdf.com/donate.html"
-    else if userChoice is "Documentation" then
-        tell application "Finder" to open location "https://www.namemypdf.com/documentation.html"
-    end if
-on error
-    -- Error handling
-end try
+  # For Web View, output HTML to display in the web view window
+  cat << 'EOF'
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NameMyPdf</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .usage {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+        .menu-button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 10px 10px 0;
+            transition: background 0.3s;
+        }
+        .menu-button:hover {
+            background: #2980b9;
+        }
+        .menu-button.secondary {
+            background: #95a5a6;
+        }
+        .menu-button.secondary:hover {
+            background: #7f8c8d;
+        }
+        .note {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📄 NameMyPdf</h1>
+        
+        <div class="usage">
+            <h3>Welcome to NameMyPdf!</h3>
+            <p>This application renames PDF files based on their DOI information.</p>
+            <p><strong>To use:</strong> Drag and drop PDF files onto this app icon to automatically rename them to the format: <code>Author Year - Title.pdf</code></p>
+        </div>
+        
+        <h3>Menu Options:</h3>
+        <a href="namemypdf://edit-config" class="menu-button">⚙️ Edit Configuration</a>
+        <a href="namemypdf://open-github" class="menu-button">🐙 Open GitHub</a>
+        <a href="namemypdf://view-docs" class="menu-button">📖 View Documentation</a>
+        <a href="namemypdf://donate" class="menu-button secondary">💝 Donate</a>
+        
+        <div class="note">
+            <strong>Note:</strong> Click the buttons above to access configuration and help. The window will close automatically after processing files.
+        </div>
+    </div>
+</body>
+</html>
 EOF
+}
+
+# Function to handle menu selections
+handle_menu_selection() {
+  local selection="$1"
+  debug_message "Menu selection: $selection"
+  
+  case "$selection" in
+    "Edit Configuration")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open -e ~/.namemypdfrc
+      fi
+      ;;
+    "Open GitHub")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://github.com/literatecomputing/name-my-pdf"
+      fi
+      ;;
+    "View Documentation")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://www.namemypdf.com/documentation.html"
+      fi
+      ;;
+    "Donate")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://www.namemypdf.com/donate.html"
+      fi
+      ;;
+    "Quit")
+      # Just exit
+      ;;
+  esac
 }
 
 # Detect if running in Platypus app bundle
@@ -248,6 +344,39 @@ fi
 if [ $# -eq 0 ] && [[ "$is_platypus_app" == "true" ]]; then
   debug_message "No files provided in GUI mode - showing app menu"
   show_app_menu
+  debug_message "==================== Session End ===================="
+  exit 0
+fi
+
+# Check if this is a menu selection (Web View links or Status Menu mode)
+if [ $# -eq 1 ] && [[ "$is_platypus_app" == "true" ]] && [[ "$1" =~ ^(Edit Configuration|Open GitHub|View Documentation|Donate|Quit|namemypdf://.*)$ ]]; then
+  debug_message "Menu selection detected: $1"
+  # Handle custom URL schemes from Web View
+  case "$1" in
+    "namemypdf://edit-config"|"Edit Configuration")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open -e ~/.namemypdfrc
+      fi
+      ;;
+    "namemypdf://open-github"|"Open GitHub")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://github.com/literatecomputing/name-my-pdf"
+      fi
+      ;;
+    "namemypdf://view-docs"|"View Documentation")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://www.namemypdf.com/documentation.html"
+      fi
+      ;;
+    "namemypdf://donate"|"Donate")
+      if [[ "$OSTYPE" == "darwin"* ]]; then
+        open "https://www.namemypdf.com/donate.html"
+      fi
+      ;;
+    "Quit")
+      # Just exit
+      ;;
+  esac
   debug_message "==================== Session End ===================="
   exit 0
 fi

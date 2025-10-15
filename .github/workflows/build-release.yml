@@ -164,11 +164,10 @@ jobs:
             --bundle-identifier "com.literatecomputing.namemypdf" \
             --author "Jay Pfaffman" \
             --app-version "${{ steps.version.outputs.VERSION }}" \
-            --interface-type "Progress Bar" \
+            --interface-type "Web View" \
             --interpreter "/bin/bash" \
             --droppable \
             --text-droppable \
-            --quit-after-execution \
             --suffixes "pdf" \
             --uniform-type-identifiers "com.adobe.pdf" \
             --bundled-file "bundled-bin/jq" \
