@@ -179,7 +179,7 @@ jobs:
               --bundled-file "normalize_filename.sh" \
               --overwrite \
               "app_launcher.sh" \
-              "dist/NameMyPdf.app"
+              "NameMyPdf.app"
 
       - name: Verify app bundle
         run: |
