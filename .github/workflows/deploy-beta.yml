@@ -6,11 +6,13 @@ on:
       - beta-site
   workflow_dispatch:
 
+jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -31,10 +33,10 @@ on:
         with:
           source: "docs/_site"
           destination: "/beta"
-          storageZoneName: "${{ secrets.BUNNY_ZONE_NAME }}"
-          storagePassword: "${{ secrets.BUNNY_PASSWORD }}"
-          accessKey: "${{ secrets.BUNNY_ACCESS_KEY }}"
-          pullZoneId: "${{ secrets.BUNNY_PULL_ZONE_ID }}"
+          storageZoneName: ${{ secrets.BUNNY_ZONE_NAME }}
+          storagePassword: ${{ secrets.BUNNY_PASSWORD }}
+          accessKey: ${{ secrets.BUNNY_ACCESS_KEY }}
+          pullZoneId: ${{ secrets.BUNNY_PULL_ZONE_ID }}
           storageEndpoint: "ny.storage.bunnycdn.com"
           upload: "true"
           purgePullZone: "true"
@@ -46,5 +48,4 @@ on:
           echo "Your beta site is now live at:" >> $GITHUB_STEP_SUMMARY
           echo "**https://<your-bunny-pullzone-domain>/beta**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
           echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
