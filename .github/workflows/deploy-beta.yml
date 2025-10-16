@@ -1,65 +1,54 @@
 name: Deploy Beta Site
 
-on:
+name: Deploy Beta Site to Bunny.net
+
+          echo "**https://literatecomputing.github.io/name-my-pdf/beta**" >> $GITHUB_STEP_SUMMARY
   push:
     branches:
       - beta-site
   workflow_dispatch:
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
-jobs:
-  build-and-deploy:
+          echo "" >> $GITHUB_STEP_SUMMARY
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          ref: beta-site
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.1"
+          ruby-version: "3.2"
           bundler-cache: true
-
-      - name: Install dependencies
-        run: |
-          gem install bundler
-          bundle install
-        working-directory: ./docs
+          working-directory: docs
 
       - name: Build Jekyll site
-        run: bundle exec jekyll build --baseurl "/name-my-pdf/beta"
-        working-directory: ./docs
+        run: |
+          cd docs
+          bundle install
+          bundle exec jekyll build --baseurl "/name-my-pdf/beta"
         env:
           JEKYLL_ENV: production
 
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
+      - name: Deploy to Bunny.net Storage (beta)
+        uses: ayeressian/bunnycdn-storage-deploy@v2.2.2
         with:
-          ref: gh-pages
-          path: gh-pages-deploy
-
-      - name: Deploy to /beta directory
-        run: |
-          mkdir -p gh-pages-deploy/beta
-          rm -rf gh-pages-deploy/beta/*
-          cp -r docs/_site/* gh-pages-deploy/beta/
-          cd gh-pages-deploy
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add .
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Deploy beta site from ${GITHUB_SHA}" && git push)
+          source: "docs/_site"
+          destination: "/beta"
+          storageZoneName: "${{ secrets.BUNNY_ZONE_NAME }}"
+          storagePassword: "${{ secrets.BUNNY_PASSWORD }}"
+          accessKey: "${{ secrets.BUNNY_ACCESS_KEY }}"
+          pullZoneId: "${{ secrets.BUNNY_PULL_ZONE_ID }}"
+          storageEndpoint: "ny.storage.bunnycdn.com"
+          upload: "true"
+          purgePullZone: "true"
 
       - name: Generate deployment summary
         run: |
-          echo "## Beta Site Deployed! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "## Beta Site Deployed to Bunny.net! 🚀" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Your beta site is now live at:" >> $GITHUB_STEP_SUMMARY
-          echo "**https://literatecomputing.github.io/name-my-pdf/beta**" >> $GITHUB_STEP_SUMMARY
+          echo "**https://<your-bunny-pullzone-domain>/beta**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
           echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
