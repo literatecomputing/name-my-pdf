@@ -14,22 +14,35 @@ remote_theme: just-the-docs/just-the-docs
 color_scheme: light
 
 # Logo
-logo: "/assets/images/icon.png"
-
+remote_theme: "mmistakes/minimal-mistakes"
+minimal_mistakes_skin: "default"
 # Navigation
 nav_enabled: true
 nav_sort: case_insensitive
 
 # Search
 search_enabled: true
+title: NameMyPDF
+description: "Stop wasting time on messy filenames. Instantly rename your academic PDFs with proper citations."
+url: "https://namemypdf.com"
+baseurl: ""
 search:
+# Marketing content
+tagline: "Your academic PDFs, perfectly named"
+subtitle: "Drag. Drop. Done."
+cta_primary: "Download for macOS"
+cta_secondary: "View on GitHub"
   heading_level: 2
+# Social
+github_username: literatecomputing
+repository: literatecomputing/name-my-pdf
   previews: 3
   preview_words_before: 5
   preview_words_after: 10
-  tokenizer_separator: /[\s/]+/
-  rel_url: true
-  button: false
+plugins:
+  - jekyll-include-cache
+  - jekyll-seo-tag
+  - jekyll-archives
 
 # Heading anchor links
 heading_anchors: true
