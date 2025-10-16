@@ -1,132 +1,65 @@
-name: Deploy Beta Sitename: Deploy Beta Site
-
-
-
-on:on:
-
-  push:  push:
-
-    branches:    branches:
-
-      - beta-site      - beta-site
-
-  workflow_dispatch:  workflow_dispatch:
-
-
-
-permissions:permissions:
-
-  contents: write  contents: write
-
-  pages: write  pages: write
-
-  id-token: write  id-token: write
-
-
-
-jobs:jobs:
-
-  build-and-deploy:  build-and-deploy:
-
-    runs-on: ubuntu-latest    runs-on: ubuntu-latest
-
-        
-
-    steps:    steps:
-
-      - name: Checkout code      - name: Checkout code
-
-        uses: actions/checkout@v4        uses: actions/checkout@v4
-
-        with:        with:
-
-          ref: beta-site          ref: beta-site
-
-
-
-      - name: Setup Ruby      - name: Setup Ruby
-
-        uses: ruby/setup-ruby@v1        uses: ruby/setup-ruby@v1
-
-        with:        with:
-
-          ruby-version: '3.1'          ruby-version: '3.1'
-
-          bundler-cache: true          bundler-cache: true
-
-
-
-      - name: Install dependencies      - name: Install dependencies
-
-        run: |        run: |
-
-          gem install bundler          gem install bundler
-
-          bundle install          bundle install
-
-        working-directory: ./docs        working-directory: ./docs
-
-
-
-      - name: Build Jekyll site      - name: Build Jekyll site
-
-        run: bundle exec jekyll build --baseurl "/name-my-pdf/beta"        run: bundle exec jekyll build --baseurl "/name-my-pdf/beta"
-
-        working-directory: ./docs        working-directory: ./docs
-
-        env:        env:
-
-          JEKYLL_ENV: production          JEKYLL_ENV: production
-
-
-
-      - name: Checkout gh-pages branch      - name: Checkout gh-pages branch
-
-        uses: actions/checkout@v4        uses: actions/checkout@v4
-
-        with:        with:
-
-          ref: gh-pages          ref: gh-pages
-
-          path: gh-pages-deploy          path: gh-pages-deploy
-
-
-
-      - name: Deploy to /beta directory      - name: Deploy to /beta directory
-
-        run: |        run: |
-
-          mkdir -p gh-pages-deploy/beta          mkdir -p gh-pages-deploy/beta
-
-          rm -rf gh-pages-deploy/beta/*          rm -rf gh-pages-deploy/beta/*
-
-          cp -r docs/_site/* gh-pages-deploy/beta/          cp -r docs/_site/* gh-pages-deploy/beta/
-
-          cd gh-pages-deploy          cd gh-pages-deploy
-
-          git config user.name "GitHub Actions"          git config user.name "GitHub Actions"
-
-          git config user.email "actions@github.com"          git config user.email "actions@github.com"
-
-          git add .          git add .
-
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Deploy beta site from ${GITHUB_SHA}" && git push)          git diff --quiet && git diff --staged --quiet || (git commit -m "Deploy beta site from ${GITHUB_SHA}" && git push)
-
-
-
-      - name: Generate deployment summary      - name: Generate deployment summary
-
-        run: |        run: |
-
-          echo "## Beta Site Deployed! 🚀" >> $GITHUB_STEP_SUMMARY          echo "## Beta Site Deployed! 🚀" >> $GITHUB_STEP_SUMMARY
-
-          echo "" >> $GITHUB_STEP_SUMMARY          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "Your beta site is now live at:" >> $GITHUB_STEP_SUMMARY          echo "Your beta site is now live at:" >> $GITHUB_STEP_SUMMARY
-
-          echo "**https://literatecomputing.github.io/name-my-pdf/beta**" >> $GITHUB_STEP_SUMMARY          echo "**https://literatecomputing.github.io/name-my-pdf/beta**" >> $GITHUB_STEP_SUMMARY
-
-          echo "" >> $GITHUB_STEP_SUMMARY          echo "" >> $GITHUB_STEP_SUMMARY
-
-          echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY          echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
-
+name: Deploy Beta Site
+
+on:
+  push:
+    branches:
+      - beta-site
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: beta-site
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install
+        working-directory: ./docs
+
+      - name: Build Jekyll site
+        run: bundle exec jekyll build --baseurl "/name-my-pdf/beta"
+        working-directory: ./docs
+        env:
+          JEKYLL_ENV: production
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-deploy
+
+      - name: Deploy to /beta directory
+        run: |
+          mkdir -p gh-pages-deploy/beta
+          rm -rf gh-pages-deploy/beta/*
+          cp -r docs/_site/* gh-pages-deploy/beta/
+          cd gh-pages-deploy
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Deploy beta site from ${GITHUB_SHA}" && git push)
+
+      - name: Generate deployment summary
+        run: |
+          echo "## Beta Site Deployed! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Your beta site is now live at:" >> $GITHUB_STEP_SUMMARY
+          echo "**https://literatecomputing.github.io/name-my-pdf/beta**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
