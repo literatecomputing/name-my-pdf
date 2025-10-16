@@ -1,88 +1,51 @@
-# Jekyll configuration for NameMyPdf website
+name: Deploy Beta Site to Bunny.net
 
-# Site settings
-title: NameMyPdf
-description: Automatically rename academic PDFs using DOI metadata
-url: "https://namemypdf.com"
-baseurl: ""
+on:
+  push:
+    branches:
+      - beta-site
+  workflow_dispatch:
 
-# Theme
-theme: just-the-docs
-remote_theme: just-the-docs/just-the-docs
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-# Color scheme (supports light, dark, or custom)
-color_scheme: light
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: docs
 
-# Logo
-logo: "/assets/images/icon.png"
+      - name: Build Jekyll site
+        run: |
+          cd docs
+          bundle install
+          bundle exec jekyll build --baseurl "/name-my-pdf/beta"
+        env:
+          JEKYLL_ENV: production
 
-# Navigation
-nav_enabled: true
-nav_sort: case_insensitive
+      - name: Deploy to Bunny.net Storage (beta)
+        uses: ayeressian/bunnycdn-storage-deploy@v2.2.2
+        with:
+          source: "docs/_site"
+          destination: "/beta"
+          storageZoneName: ${{ secrets.BUNNY_ZONE_NAME }}
+          storagePassword: ${{ secrets.BUNNY_PASSWORD }}
+          accessKey: ${{ secrets.BUNNY_ACCESS_KEY }}
+          pullZoneId: ${{ secrets.BUNNY_PULL_ZONE_ID }}
+          storageEndpoint: "ny.storage.bunnycdn.com"
+          upload: "true"
+          purgePullZone: "true"
 
-# Search
-search_enabled: true
-search:
-  heading_level: 2
-  previews: 3
-  preview_words_before: 5
-  preview_words_after: 10
-  tokenizer_separator: /[\s/]+/
-  rel_url: true
-  button: false
-
-# Heading anchor links
-heading_anchors: true
-
-# Footer content
-footer_content: "Copyright &copy; 2025 Jay Pfaffman. Distributed under the MIT License."
-
-# Back to top link
-back_to_top: true
-back_to_top_text: "Back to top"
-
-# Footer last edited timestamp
-last_edit_timestamp: true
-last_edit_time_format: "%b %e %Y at %I:%M %p"
-
-# GitHub integration
-gh_edit_link: true
-gh_edit_link_text: "Edit this page on GitHub"
-gh_edit_repository: "https://github.com/literatecomputing/name-my-pdf"
-gh_edit_branch: "main"
-gh_edit_source: docs
-gh_edit_view_mode: "tree"
-
-# Aux links (top right)
-aux_links:
-  "Download":
-    - "https://github.com/literatecomputing/name-my-pdf/releases/latest"
-  "GitHub":
-    - "https://github.com/literatecomputing/name-my-pdf"
-
-aux_links_new_tab: true
-
-# Collections
-collections:
-  docs:
-    permalink: "/:collection/:path/"
-    output: true
-
-# Exclude from processing
-exclude:
-  - Gemfile
-  - Gemfile.lock
-  - node_modules
-  - vendor/bundle/
-  - vendor/cache/
-  - vendor/gems/
-  - vendor/ruby/
-  - .sass-cache/
-  - .jekyll-cache/
-  - gemfiles/
-
-# Plugins
-plugins:
-  - jekyll-seo-tag
-  - jekyll-github-metadata
-  - jekyll-include-cache
+      - name: Generate deployment summary
+        run: |
+          echo "## Beta Site Deployed to Bunny.net! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Your beta site is now live at:" >> $GITHUB_STEP_SUMMARY
+          echo "**https://<your-bunny-pullzone-domain>/beta**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Deployed from commit: \`${GITHUB_SHA:0:7}\`" >> $GITHUB_STEP_SUMMARY
