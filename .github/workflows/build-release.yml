@@ -141,6 +141,15 @@ jobs:
 
           cd ..
 
+      - name: Inject version and build date into launcher
+        run: |
+          # Replace placeholders in app_launcher.sh with computed VERSION and BUILD_DATE
+          BUILD_DATE=$(date -u +"%Y-%m-%d")
+          echo "Injecting VERSION=${{ steps.version.outputs.VERSION }} and BUILD_DATE=${BUILD_DATE} into app_launcher.sh"
+          sed -i '' "s/VERSION_PLACEHOLDER/${{ steps.version.outputs.VERSION }}/g" app_launcher.sh || sed -i "s/VERSION_PLACEHOLDER/${{ steps.version.outputs.VERSION }}/g" app_launcher.sh
+          sed -i '' "s/DATE_PLACEHOLDER/${BUILD_DATE}/g" app_launcher.sh || sed -i "s/DATE_PLACEHOLDER/${BUILD_DATE}/g" app_launcher.sh
+
+
       - name: Build app with Platypus
         run: |
           # Remove any pre-existing app bundle that might be in the checkout
