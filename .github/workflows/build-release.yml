@@ -149,7 +149,6 @@ jobs:
           sed -i '' "s/VERSION_PLACEHOLDER/${{ steps.version.outputs.VERSION }}/g" app_launcher.sh || sed -i "s/VERSION_PLACEHOLDER/${{ steps.version.outputs.VERSION }}/g" app_launcher.sh
           sed -i '' "s/DATE_PLACEHOLDER/${BUILD_DATE}/g" app_launcher.sh || sed -i "s/DATE_PLACEHOLDER/${BUILD_DATE}/g" app_launcher.sh
 
-
       - name: Build app with Platypus
         run: |
           # Remove any pre-existing app bundle that might be in the checkout

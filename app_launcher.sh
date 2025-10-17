@@ -9,13 +9,23 @@ BUILD_DATE="${BUILD_DATE:-DATE_PLACEHOLDER}"
 APP_NAME="NameMyPdf"
 COPYRIGHT="Copyright (C) 2025 Jay Pfaffman"
 
+## Set HAVE_DEBUG_LOG if ~/Library/Logs/NameMyPdf-debug.log exists
+if [ -f ~/Library/Logs/NameMyPdf-debug.log ]; then
+    HAVE_DEBUG_LOG=true
+else
+    HAVE_DEBUG_LOG=false
+fi
+
 # If no arguments, output Status Menu items for Platypus
 if [ $# -eq 0 ]; then
     echo "About ${APP_NAME}"
     echo "Settings..."
-    echo "View Documentation"
-    echo "Open GitHub"
+    echo "NameMyPdf Help"
+    # echo "Open GitHub"
     echo "Logs"
+    if [ "$HAVE_DEBUG_LOG" = true ]; then
+        echo "Debugging Logs"
+    fi
     echo "Donate"
     exit 0
 fi
@@ -35,11 +45,15 @@ case "$arg" in
         open -a Console ~/Library/Logs/NameMyPdf.log
         exit 0
         ;;
+    "Debugging Logs")
+        open -a Console ~/Library/Logs/NameMyPdf-debug.log
+        exit 0
+        ;;
     "Open GitHub")
         open "https://github.com/literatecomputing/name-my-pdf"
         exit 0
         ;;
-    "View Documentation")
+    "NameMyPdf Help")
         open "https://www.namemypdf.com/documentation.html"
         exit 0
         ;;
@@ -79,6 +93,7 @@ APPSCRIPT
  
     *)
         # Assume arguments are files, forward to normalize_filename.sh
-        exec "$(dirname "$0")/normalize_filename.sh" "$@"
+        # send all output to /dev/null
+        exec "$(dirname "$0")/normalize_filename.sh" "$@" > /dev/null 2>&1
         ;;
 esac
