@@ -1,0 +1,47 @@
+/* Custom overrides to reduce left sidebar width */
+/* Reduce nav widths to make sidebar smaller */
+@media (min-width: 50rem) {
+  /* override sidebar width used by just-the-docs */
+  .side-bar {
+    width: 12rem !important; /* smaller than default 15.5rem/16.5rem */
+    min-width: 12rem !important;
+  }
+
+  /* Adjust main content margin so it doesn't overlap */
+  .side-bar + .main {
+    margin-left: 12rem !important;
+  }
+
+  /* Ensure site-nav and headers adapt */
+  .site-nav,
+  .site-header,
+  .site-footer {
+    width: 12rem !important;
+  }
+
+  /* Make sure search results width accounts for smaller nav */
+  .search-results {
+    max-width: calc(100% - 12rem) !important;
+  }
+}
+
+/* On very wide layouts, cap the sidebar so it doesn't grow by calc() rules */
+@media (min-width: 90rem) {
+  .side-bar {
+    width: 13rem !important;
+  }
+  .side-bar + .main {
+    margin-left: 13rem !important;
+  }
+}
+
+/* Small screens: keep theme behaviour */
+@media (max-width: 49.99rem) {
+  .side-bar {
+    position: relative !important;
+    width: 100% !important;
+  }
+  .side-bar + .main {
+    margin-left: 0 !important;
+  }
+}
