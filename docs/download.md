@@ -14,21 +14,21 @@ Get the latest version of NameMyPdf for macOS.
 
 <!-- VERSION-UPDATE-START -->
 
-[Download DMG (Recommended)](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.52/NameMyPdf-v0.9.52.dmg){: .btn .btn-primary .btn-purple }
-[Download ZIP](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.52/NameMyPdf-v0.9.52.zip){: .btn }<!-- VERSION-UPDATE-END -->[View All Releases](https://github.com/literatecomputing/name-my-pdf/releases){: .btn }
+[Download DMG (Recommended)](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.53/NameMyPdf-v0.9.53.dmg){: .btn .btn-primary .btn-purple }
+[Download ZIP](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.53/NameMyPdf-v0.9.53.zip){: .btn }<!-- VERSION-UPDATE-END -->[View All Releases](https://github.com/literatecomputing/name-my-pdf/releases){: .btn }
 
 ## Latest Release Page at Github
 
 <!-- VERSION-UPDATE-START -->
 <div class="code-example" markdown="1">
-**Current Version:** v0.9.52 ([release details](https://github.com/literatecomputing/name-my-pdf/releases/tag/v0.9.52))
+**Current Version:** v0.9.53 ([release details](https://github.com/literatecomputing/name-my-pdf/releases/tag/v0.9.53))
 **Last Updated:** October 17, 2025
 </div>
 <!-- VERSION-UPDATE-END -->
 
 ## Installation Instructions
 
-1. **Download** the <!-- VERSION-UPDATE-START -->[DMG](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.52/NameMyPdf-v0.9.52.dmg)<!-- VERSION-UPDATE-END -->
+1. **Download** the <!-- VERSION-UPDATE-START -->[DMG](https://github.com/literatecomputing/name-my-pdf/releases/download/v0.9.53/NameMyPdf-v0.9.53.dmg)<!-- VERSION-UPDATE-END -->
 
 2. **Open** the DMG to mount the disk image
 3. **Drag** `NameMyPdf.app` to the Applications folder icon.
