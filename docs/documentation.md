@@ -254,6 +254,14 @@ No, NameMyPdf needs internet access to query the CrossRef API for metadata.
 
 Only the DOI is sent to the CrossRef API when you make the request for the data. No file contents or personal data is transmitted.
 
+### I've installed a bunch of versions and now see multiple versions in Open With
+
+See [this discussion](https://discussions.apple.com/thread/8496769?sortBy=rank) on an Apple Forum. They say to paste this command into a terminal to fix it:
+
+```
+/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -kill -r -seed -domain local -domain system -domain user
+```
+
 ---
 
 ## Need More Help?
