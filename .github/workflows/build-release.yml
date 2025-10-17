@@ -166,7 +166,7 @@ jobs:
               --status-item-title "NameMyPdf" \
               --bundle-identifier "com.literatecomputing.namemypdf" \
               --author "Jay Pfaffman" \
-              --app-version "1.0.0" \
+              --app-version "${{ steps.version.outputs.VERSION }}" \
               --interface-type "Status Menu" \
               --interpreter "/bin/bash" \
               --droppable \
