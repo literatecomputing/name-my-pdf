@@ -30,7 +30,6 @@ STRIP_TITLE_POST_COLON=true # shorten title to before the colon
 DEBUG=false # log info for debugging issues
 LOG=true # log files renamed 
 EOF
-  open -e ~/.namemypdfrc
 fi
 source ~/.namemypdfrc
 # Error collection array
