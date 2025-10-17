@@ -10,7 +10,7 @@ permalink: /
 
 {: .fs-9 }
 
-[Automatically PDF files with year, author, title retrieved from DOI database](#)
+[Automatically rename PDF files with year, author, title retrieved from DOI database](#)
 {: .fs-6 .fw-300 }
 
 [Download](/download.html){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 } <!-- VERSION-UPDATE-MARKER -->
