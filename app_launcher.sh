@@ -5,10 +5,11 @@
 
 # If no arguments, output Status Menu items for Platypus
 if [ $# -eq 0 ]; then
-    echo "Donate"
-    echo "Edit Configuration"
+    echo "Settings..."
     echo "View Documentation"
     echo "Open GitHub"
+    echo "Logs"
+    echo "Donate"
     exit 0
 fi
 
@@ -19,8 +20,12 @@ action="${action:-$1}"
 arg="$(printf '%s' "$action" | sed 's/%20/ /g')"
 echo "[DEBUG] Parsed action: $arg" >> /tmp/name-my-pdf-debug.log
 case "$arg" in
-    "Edit Configuration")
+    "Settings...")
         open -e ~/.namemypdfrc
+        exit 0
+        ;;
+    "Logs")
+        open -a Console ~/Library/Logs/NameMyPdf.log
         exit 0
         ;;
     "Open GitHub")
