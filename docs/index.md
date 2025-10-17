@@ -19,6 +19,17 @@ permalink: /
 
 ---
 
+## Demo
+
+<div class="home-video-wrapper" style="margin: 1.5rem 0; display:flex; justify-content:center;">
+	<video autoplay muted loop playsinline preload="metadata" style="width:100%; min-width:640px; max-width:1048px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.1); outline:none;">
+		<source src="/images/NameMyPdf-big.mp4" type="video/mp4">
+		Your browser does not support the video tag.
+	</video>
+</div>
+
+There is also a [longer demo](/demo/).
+
 ## ✨ Features
 
 **Universal Binary**
