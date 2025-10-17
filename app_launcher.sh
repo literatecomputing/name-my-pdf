@@ -9,6 +9,13 @@ BUILD_DATE="${BUILD_DATE:-DATE_PLACEHOLDER}"
 APP_NAME="NameMyPdf"
 COPYRIGHT="Copyright (C) 2025 Jay Pfaffman"
 
+## Set FILES_RENAMED to length of ~/Library/Logs/NameMyPdf.log
+if [ -f ~/Library/Logs/NameMyPdf.log ]; then
+    FILES_RENAMED=$(wc -l < ~/Library/Logs/NameMyPdf.log)
+else
+    FILES_RENAMED=0
+fi
+
 ## Set HAVE_DEBUG_LOG if ~/Library/Logs/NameMyPdf-debug.log exists
 if [ -f ~/Library/Logs/NameMyPdf-debug.log ]; then
     HAVE_DEBUG_LOG=true
@@ -16,15 +23,28 @@ else
     HAVE_DEBUG_LOG=false
 fi
 
+## Set HAVE_LOGS if ~/Library/Logs/NameMyPdf.log exists
+if [ -f ~/Library/Logs/NameMyPdf.log ]; then
+    HAVE_LOGS=true
+else
+    HAVE_LOGS=false
+fi
+
+
 # If no arguments, output Status Menu items for Platypus
 if [ $# -eq 0 ]; then
     echo "About ${APP_NAME}"
     echo "Settings..."
     echo "NameMyPdf Help"
     # echo "Open GitHub"
-    echo "Logs"
+    if [ "$HAVE_LOGS" = true ]; then
+        echo "Renamed Logs"
+    fi
     if [ "$HAVE_DEBUG_LOG" = true ]; then
         echo "Debugging Logs"
+    fi
+    if [ "$FILES_RENAMED" -gt 0 ]; then
+        echo "DISABLED|$FILES_RENAMED files renamed."
     fi
     echo "Donate"
     exit 0
