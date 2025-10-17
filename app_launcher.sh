@@ -140,7 +140,7 @@ EOF
         fi
 
         if [ "$SHOW_UPDATE" = true ]; then
-            MSG="${BASE_MSG}\n\nLatest: ${LATEST_TAG}${LATEST_NAME:+ - $LATEST_NAME}"
+            MSG="${BASE_MSG}\n\nUpgrade Available${LATEST_NAME:+ - $LATEST_NAME}"
             if [ -n "$ICON_PATH" ]; then
                 BUTTON=$(/usr/bin/osascript <<APPSCRIPT
 try
