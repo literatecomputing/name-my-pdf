@@ -203,22 +203,19 @@ This will show detailed information about:
 
 **Solutions:**
 
-- Make sure the PDF actually contains DOI information
-- DOI should be on the first 2 pages
-- If it looks like the script should have found the DOI, open an [issue](https://github.com/literatecomputing/name-my-pdf/issues) and describe why you think the script might not have found the DOI.
+- Make sure the PDF contains a DOI in the first two pages. Many older PDFs do not follow this convention.
+- If you see the DOI and think that there's a bug in how the script detects DOIs, please open an [issue](https://github.com/literatecomputing/name-my-pdf/issues) and describe why you think the script might not have found the DOI. I
 
 ### Resource Not Found
 
 **Problem:** "[DOI] --- not found"
 
-**Explanations:**
+**Explanations and things to try:**
 
 - The DOI exists in the PDF but isn't in CrossRef database
 - Try manually looking up the DOI at https://doi.org/
 - The DOI might be malformed or incorrect
-- Publishers are surprisingly bad at having correct data in the database. I've seen missing authors (on my own article!) and trash thrown into various fields.
-
-There probably are no solutions.
+- Publishers are surprisingly bad at having correct data in the database. I've seen missing authors (on my own article!) and trash thrown into various fields. It's almost certainly a problem with the data provided by the publisher, but there could be some edge cases that have not yet been identified. If it looks like the data in the DOI database is correct but the file isn't renamed as expected, Open an [issue](https://github.com/literatecomputing/name-my-pdf/issues) with the DOI.
 
 ### File Not Renamed
 
@@ -234,9 +231,22 @@ There probably are no solutions.
 
 No, NameMyPdf specifically looks for DOI information, which is typically only in academic papers. PDFs without a DOI on the first two pages won't be renamed.
 
+### How come nothing happens the first time I use "Open With"?
+
+This is a known problem. If the app hasn't been opened the filename isn't passed to the script that does the work until you click the NameMyPdf menu at the top of the screen or just try it again. I spent an entire day trying to save you making this extra click and failed. I'm very sorry.
+
+### How can I change the format of the filename?
+
+Choose "Settings" from the NameMyPdf "status Icon" (I can't get it be be an icon, so it's a word) on the Menu Bar. It opens TextEdit. Change the values, save, and quit. Then rename again.
+
 ### Can I undo a rename?
 
-Not automatically, but the log file shows what was renamed. You can manually rename files back if needed.
+Not automatically, but the log file (accessible from the menu) shows what was renamed and when. You can manually rename files back if needed.
+
+### I want a name that isn't possible with the available settings. What can I do?
+
+Open an [issue](https://github.com/literatecomputing/name-my-pdf/issues) and explain what format you want and make a suggestion. I would want the author in lower case, but
+I'm no longer an academic, so until someone else wants that, I'm not going to spend the time.
 
 ### Does it modify the PDF content?
 
